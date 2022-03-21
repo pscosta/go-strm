@@ -8,6 +8,7 @@ import (
 type Predicate[T any] func(v T) bool
 type Mapper[IN any, OUT any] func(v IN) OUT
 type Reducer[OUT any, IN any] func(OUT, IN) OUT
+type Ordered interface{ int | int64 | float32 | string }
 
 type Stream[T any] struct {
 	Slice      []T
@@ -59,10 +60,7 @@ func Of[T any](elems ...T) *Stream[T] {
 		slice = append(slice, elem)
 	}
 
-	return &Stream[T]{
-		Slice:      slice,
-		streamType: reflect.TypeOf((*T)(nil)).Elem().Kind(),
-	}
+	return From(slice)
 }
 
 // Main functions
@@ -108,7 +106,7 @@ func (s *Stream[T]) OnEach(f func(T)) *Stream[T] {
 	return s
 }
 
-func Max[C int](s *Stream[C]) (max C) {
+func Max[C Ordered](s *Stream[C]) (max C) {
 	if len(s.filteredSlice()) == 0 {
 		return
 	}
@@ -121,7 +119,7 @@ func Max[C int](s *Stream[C]) (max C) {
 	return
 }
 
-func Min[C int](s *Stream[C]) (min C) {
+func Min[C Ordered](s *Stream[C]) (min C) {
 	if len(s.filteredSlice()) == 0 {
 		return
 	}
