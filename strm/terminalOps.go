@@ -14,7 +14,7 @@ func (s *Stream[T]) ForEach(f func(T)) {
 	}
 }
 
-func (s *Stream[T]) Any(p Predicate[T]) bool {
+func (s *Stream[T]) Any(p predicate[T]) bool {
 	for _, elem := range s.filteredSlice() {
 		if p(elem) {
 			return true
@@ -23,7 +23,7 @@ func (s *Stream[T]) Any(p Predicate[T]) bool {
 	return false
 }
 
-func (s *Stream[T]) All(p Predicate[T]) bool {
+func (s *Stream[T]) All(p predicate[T]) bool {
 	for _, elem := range s.filteredSlice() {
 		if !p(elem) {
 			return false
@@ -32,7 +32,7 @@ func (s *Stream[T]) All(p Predicate[T]) bool {
 	return true
 }
 
-func (s *Stream[T]) None(p Predicate[T]) bool {
+func (s *Stream[T]) None(p predicate[T]) bool {
 	return !s.Any(p)
 }
 
@@ -40,7 +40,7 @@ func (s *Stream[T]) Count() int {
 	return len(s.filteredSlice())
 }
 
-func (s *Stream[T]) CountBy(p Predicate[T]) (count int) {
+func (s *Stream[T]) CountBy(p predicate[T]) (count int) {
 	for _, elem := range s.filteredSlice() {
 		if p(elem) {
 			count++
@@ -49,7 +49,7 @@ func (s *Stream[T]) CountBy(p Predicate[T]) (count int) {
 	return
 }
 
-func (s *Stream[T]) FirstBy(p Predicate[T]) (t T) {
+func (s *Stream[T]) FirstBy(p predicate[T]) (t T) {
 	for _, elem := range s.filteredSlice() {
 		if p(elem) {
 			return elem

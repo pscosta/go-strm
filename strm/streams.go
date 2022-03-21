@@ -4,14 +4,14 @@ import (
 	"reflect"
 )
 
-type Predicate[T any] func(v T) bool
-type Mapper[IN any, OUT any] func(v IN) OUT
-type Reducer[OUT any, IN any] func(OUT, IN) OUT
-type Ordered interface{ int | int64 | float32 | string }
+type predicate[T any] func(v T) bool
+type mapper[IN any, OUT any] func(v IN) OUT
+type reducer[OUT any, IN any] func(OUT, IN) OUT
+type ordered interface{ int | int64 | float32 | string }
 
 type Stream[T any] struct {
 	Slice      []T
-	filters    []Predicate[T]
+	filters    []predicate[T]
 	streamType reflect.Kind
 }
 
@@ -45,12 +45,12 @@ func CopyFrom[T any](slice []T) *Stream[T] {
 
 // Main functions
 
-func (s *Stream[T]) Filter(f Predicate[T]) *Stream[T] {
+func (s *Stream[T]) Filter(f predicate[T]) *Stream[T] {
 	s.filters = append(s.filters, f)
 	return s
 }
 
-func Map[IN any, OUT any](s *Stream[IN], f Mapper[IN, OUT]) *Stream[OUT] {
+func Map[IN any, OUT any](s *Stream[IN], f mapper[IN, OUT]) *Stream[OUT] {
 	var newSlice []OUT
 
 	for _, elem := range s.filteredSlice() {
@@ -59,7 +59,7 @@ func Map[IN any, OUT any](s *Stream[IN], f Mapper[IN, OUT]) *Stream[OUT] {
 	return From(newSlice)
 }
 
-func Reduce[IN any, OUT any](s *Stream[IN], start OUT, f Reducer[OUT, IN]) OUT {
+func Reduce[IN any, OUT any](s *Stream[IN], start OUT, f reducer[OUT, IN]) OUT {
 	out := start
 	for _, elem := range s.Slice {
 		out = f(out, elem)
@@ -74,7 +74,6 @@ func GroupBy[K comparable, V any](s *Stream[V], keySelector func(V) K) map[K][]V
 		key := keySelector(elem)
 		grouping[key] = append(grouping[key], elem)
 	}
-
 	return grouping
 }
 
@@ -86,7 +85,7 @@ func (s *Stream[T]) filteredSlice() []T {
 	return s.Slice
 }
 
-func applyFilters[T any](slice *[]T, filters []Predicate[T]) {
+func applyFilters[T any](slice *[]T, filters []predicate[T]) {
 	i := 0
 filtering:
 	for _, elem := range *slice {

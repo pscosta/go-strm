@@ -9,7 +9,7 @@ func (s *Stream[T]) OnEach(f func(T)) *Stream[T] {
 	return s
 }
 
-func Max[O Ordered](s *Stream[O]) (max O) {
+func Max[O ordered](s *Stream[O]) (max O) {
 	max = s.First()
 	for _, elem := range s.Slice {
 		if elem > max {
@@ -19,7 +19,7 @@ func Max[O Ordered](s *Stream[O]) (max O) {
 	return
 }
 
-func Min[O Ordered](s *Stream[O]) (min O) {
+func Min[O ordered](s *Stream[O]) (min O) {
 	min = s.First()
 	for _, elem := range s.Slice {
 		if elem < min {
@@ -29,7 +29,7 @@ func Min[O Ordered](s *Stream[O]) (min O) {
 	return
 }
 
-func Sum[O Ordered](s *Stream[O]) (sum O) {
+func Sum[O ordered](s *Stream[O]) (sum O) {
 	for _, elem := range s.Slice {
 		sum += elem
 	}
@@ -38,7 +38,8 @@ func Sum[O Ordered](s *Stream[O]) (sum O) {
 
 // Reversed reverses the backing Slice
 func (s *Stream[T]) Reversed() *Stream[T] {
-	for i := (len(s.filteredSlice()) / 2) - 1; i >= 0; i-- {
+	s.filteredSlice()
+	for i := len(s.Slice)/2 - 1; i >= 0; i-- {
 		opp := len(s.Slice) - 1 - i
 		s.Slice[i], (s.Slice)[opp] = (s.Slice)[opp], (s.Slice)[i]
 	}
