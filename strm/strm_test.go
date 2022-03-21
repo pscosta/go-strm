@@ -6,18 +6,16 @@ func TestOf(t *testing.T) {
 	// call
 	stream := Of(1, 2, 3)
 	// assert
-	if got := stream.Slice; len(got) != 3 {
+	if got := stream.ToSlice(); len(got) != 3 {
 		t.Errorf("len(stream) = %d; want 3", len(got))
 	}
 }
 
 func TestFrom(t *testing.T) {
-	// prepare
-	slice := [][]int{{1}, {1, 2}, {1, 2, 3}}
 	// call
-	stream := From(slice)
+	stream := From([][]int{{1}, {1, 2}, {1, 2, 3}})
 	// assert
-	if got := stream.Slice; len(got) != 3 {
+	if got := stream.ToSlice(); len(got) != 3 {
 		t.Errorf("len(stream) = %d; want 3", len(got))
 	}
 }
@@ -39,10 +37,8 @@ func TestToSlice(t *testing.T) {
 }
 
 func TestFilter(t *testing.T) {
-	// prepare
-	initSlice := [][]int{{1}, {1, 2}, {1, 2, 3}}
 	// call
-	got := From(initSlice).
+	got := From([][]int{{1}, {1, 2}, {1, 2, 3}}).
 		Filter(func(it []int) bool { return len(it) > 2 }).
 		ToSlice()
 	// assert
@@ -102,6 +98,9 @@ func TestLazyFilters(t *testing.T) {
 	// assert
 	if len(got.Slice) != 3 {
 		t.Errorf("len(stream.Slice) = %d; want 3", len(got.Slice))
+	}
+	if len(initSlice) != 3 {
+		t.Errorf("len(stream.Slice) = %d; want 3", len(initSlice))
 	}
 }
 
@@ -421,11 +420,11 @@ func TestGroupBy(t *testing.T) {
 		name string
 		age  int
 	}
-	slice := []Person{Person{"Tim", 30}, Person{"Bil", 40}, Person{"John", 30}, Person{"Tim", 35}}
+	stream := Of(Person{"Tim", 30}, Person{"Bil", 40}, Person{"John", 30}, Person{"Tim", 35})
 
 	// call
-	byAge := GroupBy(From(slice), func(it Person) int { return it.age })
-	byName := GroupBy(From(slice), func(it Person) string { return it.name })
+	byAge := GroupBy(stream, func(it Person) int { return it.age })
+	byName := GroupBy(stream, func(it Person) string { return it.name })
 
 	// assert
 	if len(byAge) != 3 {
