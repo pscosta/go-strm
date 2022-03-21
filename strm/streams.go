@@ -17,9 +17,9 @@ type Stream[T any] struct {
 
 // Constructors
 
-func From[T any](slice []T) *Stream[T] {
+func From[T any](backingSlice []T) *Stream[T] {
 	return &Stream[T]{
-		Slice:      slice,
+		Slice:      backingSlice,
 		streamType: reflect.TypeOf((*T)(nil)).Elem().Kind(),
 	}
 }
@@ -30,8 +30,17 @@ func Of[T any](elems ...T) *Stream[T] {
 	for _, elem := range elems {
 		slice = append(slice, elem)
 	}
-
 	return From(slice)
+}
+
+func CopyFrom[T any](slice []T) *Stream[T] {
+	copySlice := make([]T, len(slice))
+	copy(copySlice, slice)
+
+	return &Stream[T]{
+		Slice:      copySlice,
+		streamType: reflect.TypeOf((*T)(nil)).Elem().Kind(),
+	}
 }
 
 // Main functions
@@ -47,7 +56,6 @@ func Map[IN any, OUT any](s *Stream[IN], f Mapper[IN, OUT]) *Stream[OUT] {
 	for _, elem := range s.filteredSlice() {
 		newSlice = append(newSlice, f(elem))
 	}
-
 	return From(newSlice)
 }
 
