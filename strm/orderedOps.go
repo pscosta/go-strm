@@ -11,7 +11,7 @@ func (s *Stream[T]) OnEach(f func(T)) *Stream[T] {
 
 func Max[O ordered](s *Stream[O]) (max O) {
 	max = s.First()
-	for _, elem := range s.Slice {
+	for _, elem := range s.slice {
 		if elem > max {
 			max = elem
 		}
@@ -21,7 +21,7 @@ func Max[O ordered](s *Stream[O]) (max O) {
 
 func Min[O ordered](s *Stream[O]) (min O) {
 	min = s.First()
-	for _, elem := range s.Slice {
+	for _, elem := range s.slice {
 		if elem < min {
 			min = elem
 		}
@@ -30,23 +30,23 @@ func Min[O ordered](s *Stream[O]) (min O) {
 }
 
 func Sum[O ordered](s *Stream[O]) (sum O) {
-	for _, elem := range s.Slice {
+	for _, elem := range s.slice {
 		sum += elem
 	}
 	return
 }
 
-// Reversed reverses the backing Slice
+// Reversed reverses the backing slice
 func (s *Stream[T]) Reversed() *Stream[T] {
 	s.filteredSlice()
-	for i := len(s.Slice)/2 - 1; i >= 0; i-- {
-		opp := len(s.Slice) - 1 - i
-		s.Slice[i], (s.Slice)[opp] = (s.Slice)[opp], (s.Slice)[i]
+	for i := len(s.slice)/2 - 1; i >= 0; i-- {
+		opp := len(s.slice) - 1 - i
+		s.slice[i], (s.slice)[opp] = (s.slice)[opp], (s.slice)[i]
 	}
 	return s
 }
 
-// Distinct In-place deduplication of the backing Slice
+// Distinct In-place deduplication of the backing slice
 func (s *Stream[T]) Distinct() *Stream[T] {
 	var keySelector func(t T) any
 
@@ -61,19 +61,19 @@ func (s *Stream[T]) Distinct() *Stream[T] {
 	keys := make(map[any]struct{}, len(s.filteredSlice()))
 	j := 0
 
-	for i := 0; i < len(s.Slice); i++ {
-		if _, prs := keys[keySelector(s.Slice[i])]; prs {
+	for i := 0; i < len(s.slice); i++ {
+		if _, prs := keys[keySelector(s.slice[i])]; prs {
 			continue
 		}
-		keys[keySelector(s.Slice[i])] = struct{}{}
-		s.Slice[j] = s.Slice[i]
+		keys[keySelector(s.slice[i])] = struct{}{}
+		s.slice[j] = s.slice[i]
 		j++
 	}
-	s.Slice = s.Slice[:j]
+	s.slice = s.slice[:j]
 	return s
 }
 
-// Contains Distinct In-place deduplication of the backing Slice
+// Contains Distinct In-place deduplication of the backing slice
 func (s *Stream[T]) Contains(t T) bool {
 	var valSelector func(t T) any
 

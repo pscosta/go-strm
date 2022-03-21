@@ -62,21 +62,21 @@ func (s *Stream[T]) First() (t T) {
 	if len(s.filteredSlice()) == 0 {
 		return
 	}
-	return s.Slice[0]
+	return s.slice[0]
 }
 
 func (s *Stream[T]) Last() (t T) {
 	if len(s.filteredSlice()) == 0 {
 		return
 	}
-	return s.filteredSlice()[len(s.Slice)-1]
+	return s.filteredSlice()[len(s.slice)-1]
 }
 
 func (s *Stream[T]) JoinToString(delimiter string) (joined string) {
 	s.filteredSlice()
-	for i := 0; i < len(s.Slice); i++ {
-		joined += fmt.Sprint(s.Slice[i])
-		if i+1 < len(s.Slice) {
+	for i := 0; i < len(s.slice); i++ {
+		joined += fmt.Sprint(s.slice[i])
+		if i+1 < len(s.slice) {
 			joined += delimiter
 		}
 	}

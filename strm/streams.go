@@ -10,7 +10,7 @@ type reducer[OUT any, IN any] func(OUT, IN) OUT
 type ordered interface{ int | int64 | float32 | string }
 
 type Stream[T any] struct {
-	Slice      []T
+	slice      []T
 	filters    []predicate[T]
 	streamType reflect.Kind
 }
@@ -19,7 +19,7 @@ type Stream[T any] struct {
 
 func From[T any](backingSlice []T) *Stream[T] {
 	return &Stream[T]{
-		Slice:      backingSlice,
+		slice:      backingSlice,
 		streamType: reflect.TypeOf((*T)(nil)).Elem().Kind(),
 	}
 }
@@ -38,7 +38,7 @@ func CopyFrom[T any](slice []T) *Stream[T] {
 	copy(copySlice, slice)
 
 	return &Stream[T]{
-		Slice:      copySlice,
+		slice:      copySlice,
 		streamType: reflect.TypeOf((*T)(nil)).Elem().Kind(),
 	}
 }
@@ -61,7 +61,7 @@ func Map[IN any, OUT any](s *Stream[IN], f mapper[IN, OUT]) *Stream[OUT] {
 
 func Reduce[IN any, OUT any](s *Stream[IN], start OUT, f reducer[OUT, IN]) OUT {
 	out := start
-	for _, elem := range s.Slice {
+	for _, elem := range s.slice {
 		out = f(out, elem)
 	}
 	return out
@@ -70,7 +70,7 @@ func Reduce[IN any, OUT any](s *Stream[IN], start OUT, f reducer[OUT, IN]) OUT {
 func GroupBy[K comparable, V any](s *Stream[V], keySelector func(V) K) map[K][]V {
 	grouping := make(map[K][]V, len(s.filteredSlice()))
 
-	for _, elem := range s.Slice {
+	for _, elem := range s.slice {
 		key := keySelector(elem)
 		grouping[key] = append(grouping[key], elem)
 	}
@@ -80,9 +80,9 @@ func GroupBy[K comparable, V any](s *Stream[V], keySelector func(V) K) map[K][]V
 // Internal Ops
 
 func (s *Stream[T]) filteredSlice() []T {
-	applyFilters(&(s.Slice), s.filters)
+	applyFilters(&(s.slice), s.filters)
 	s.filters = nil
-	return s.Slice
+	return s.slice
 }
 
 func applyFilters[T any](slice *[]T, filters []predicate[T]) {

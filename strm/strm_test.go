@@ -96,11 +96,11 @@ func TestLazyFilters(t *testing.T) {
 		Filter(func(it []int) bool { return len(it) < 3 })
 
 	// assert
-	if len(got.Slice) != 3 {
-		t.Errorf("len(stream.Slice) = %d; want 3", len(got.Slice))
+	if len(got.slice) != 3 {
+		t.Errorf("len(stream.slice) = %d; want 3", len(got.slice))
 	}
 	if len(initSlice) != 3 {
-		t.Errorf("len(stream.Slice) = %d; want 3", len(initSlice))
+		t.Errorf("len(stream.slice) = %d; want 3", len(initSlice))
 	}
 }
 
