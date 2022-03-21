@@ -9,7 +9,7 @@ func (s *Stream[T]) OnEach(f func(T)) *Stream[T] {
 	return s
 }
 
-func Max[C Ordered](s *Stream[C]) (max C) {
+func Max[O Ordered](s *Stream[O]) (max O) {
 	max = s.First()
 	for _, elem := range s.Slice {
 		if elem > max {
@@ -19,12 +19,19 @@ func Max[C Ordered](s *Stream[C]) (max C) {
 	return
 }
 
-func Min[C Ordered](s *Stream[C]) (min C) {
+func Min[O Ordered](s *Stream[O]) (min O) {
 	min = s.First()
 	for _, elem := range s.Slice {
 		if elem < min {
 			min = elem
 		}
+	}
+	return
+}
+
+func Sum[O Ordered](s *Stream[O]) (sum O) {
+	for _, elem := range s.Slice {
+		sum += elem
 	}
 	return
 }
