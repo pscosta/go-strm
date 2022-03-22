@@ -7,7 +7,10 @@ import (
 type predicate[T any] func(v T) bool
 type mapper[IN any, OUT any] func(v IN) OUT
 type reducer[OUT any, IN any] func(OUT, IN) OUT
-type ordered interface{ int | int64 | float32 | string }
+type ordered interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 |
+		~uint32 | ~uint64 | ~uintptr | ~float32 | ~float64 | ~string
+}
 
 type Stream[T any] struct {
 	slice      []T
@@ -45,8 +48,8 @@ func CopyFrom[T any](slice []T) *Stream[T] {
 
 // Main functions
 
-func (s *Stream[T]) Filter(f predicate[T]) *Stream[T] {
-	s.filters = append(s.filters, f)
+func (s *Stream[T]) Filter(p predicate[T]) *Stream[T] {
+	s.filters = append(s.filters, p)
 	return s
 }
 
@@ -59,8 +62,21 @@ func Map[IN any, OUT any](s *Stream[IN], f mapper[IN, OUT]) *Stream[OUT] {
 	return From(newSlice)
 }
 
-func Reduce[IN any, OUT any](s *Stream[IN], start OUT, f reducer[OUT, IN]) OUT {
-	out := start
+func FlatMap[IN any, OUT any](s *Stream[IN], f mapper[IN, *Stream[OUT]]) *Stream[OUT] {
+	var newSlice []OUT
+
+	for _, elem := range s.filteredSlice() {
+		for _, slice := range f(elem).filteredSlice() {
+			newSlice = append(newSlice, slice)
+		}
+	}
+	return From(newSlice)
+}
+
+func Reduce[IN any, OUT any](s *Stream[IN], f reducer[OUT, IN], start ...OUT) (out OUT) {
+	if len(start) > 0 {
+		out = start[0]
+	}
 	for _, elem := range s.slice {
 		out = f(out, elem)
 	}
