@@ -9,6 +9,13 @@ func (s *Stream[T]) OnEach(f func(T)) *Stream[T] {
 	return s
 }
 
+func (s *Stream[T]) ApplyOnEach(f func(T) T) *Stream[T] {
+	for i, elem := range s.filteredSlice() {
+		s.slice[i] = f(elem)
+	}
+	return s
+}
+
 func Max[O ordered](s *Stream[O]) (max O) {
 	max = s.First()
 	for _, elem := range s.slice {
@@ -73,7 +80,7 @@ func (s *Stream[T]) Distinct() *Stream[T] {
 	return s
 }
 
-// Contains Distinct In-place deduplication of the backing slice
+// Contains In-place deduplication of the backing slice
 func (s *Stream[T]) Contains(t T) bool {
 	var valSelector func(t T) any
 
@@ -92,4 +99,45 @@ func (s *Stream[T]) Contains(t T) bool {
 		}
 	}
 	return false
+}
+
+// Chunked Splits this Stream into several slices each not exceeding the given [size]
+// The last list may have fewer elements than the given [size].
+//	 size: the nr. of elems to take in each slice, must be >0 and can be greater than the nr of elems in this stream
+func (s *Stream[T]) Chunked(batchSize int) [][]T {
+	batches := make([][]T, 0, (len(s.filteredSlice())+batchSize-1)/batchSize)
+
+	for batchSize < len(s.slice) {
+		s.slice, batches = s.slice[batchSize:], append(batches, s.slice[0:batchSize:batchSize])
+	}
+	return append(batches, s.slice)
+}
+
+// Windowed Returns a slice of slices of the window of the given size, sliding along this Stream with the given [step].
+// Several last slices may have fewer elements than the given [size].
+// Both [size] and [step] must be positive and can be greater than the number of elements in this Stream.
+//	 size: the number of elements to take in each window
+// 	 step: the number of elements to move the window forward by on each step
+//	 partialWindows: controls whether to keep partial windows in the end if any, false by default
+func (s *Stream[T]) Windowed(size int, step int, partialWindows ...bool) [][]T {
+	// returns the input slice as the first element
+	if len(s.filteredSlice()) <= size {
+		return [][]T{s.slice}
+	}
+	// no partial windows by default
+	partialWin := false
+	if len(partialWindows) > 0 {
+		partialWin = partialWindows[0]
+	}
+	// allocate slice at the requested
+	res := make([][]T, 0, len(s.slice)/size+1)
+
+	winSize := step
+	for i, j := 0, size; j <= len(s.slice) && i <= len(s.slice) && i < j; i, j = i+step, j+winSize {
+		res = append(res, s.slice[i:j])
+		if (len(s.slice)-j) < winSize && partialWin {
+			winSize, j = 0, len(s.slice)
+		}
+	}
+	return res
 }
