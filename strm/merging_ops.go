@@ -2,7 +2,7 @@ package strm
 
 // Plus copies the backing slices contents of both Streams into a new *Stream[T]
 func (s *Stream[T]) Plus(other *Stream[T]) *Stream[T] {
-	merged := make([]T, len(s.filteredSlice())+len(other.filteredSlice()))
+	merged := make([]T, len(s.filteredSlice()), len(s.slice)+len(other.filteredSlice()))
 	copy(merged, s.slice)
 	return From(append(merged, other.slice...))
 }
@@ -20,9 +20,9 @@ func Merge[T any](streams ...*Stream[T]) *Stream[T] {
 	for _, s := range streams {
 		lt += len(s.filteredSlice())
 	}
-	merged := make([]T, lt)
+	merged := make([]T, 0, lt)
 	for _, s := range streams {
-		copy(merged, s.slice)
+		merged = append(merged, s.slice...)
 	}
 	return From(merged)
 }
