@@ -1,6 +1,9 @@
 package strm
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestOf(t *testing.T) {
 	// call
@@ -111,7 +114,7 @@ func TestMapReduce(t *testing.T) {
 	// call
 	got := Map(
 		From(initSlice),
-		func(it []int) int { return Reduce(From(it), 0, func(a int, b int) int { return a + b }) },
+		func(it []int) int { return Reduce(From(it), func(a int, b int) int { return a + b }) },
 	).ToSlice()
 
 	// assert
@@ -126,6 +129,53 @@ func TestMapReduce(t *testing.T) {
 	}
 	if got[2] != 6 {
 		t.Errorf("mappedSlice[0] = %d; want 6", got[0])
+	}
+}
+
+func TestMapReduceWithStart(t *testing.T) {
+	// prepare
+	initSlice := [][]int{{1}, {1, 2}, {1, 2, 3}}
+
+	// call
+	got := Map(
+		From(initSlice),
+		func(it []int) int { return Reduce(From(it), func(a int, b int) int { return a + b }, 1) },
+	).ToSlice()
+
+	// assert
+	if len(got) != 3 {
+		t.Errorf("len(mappedSlice) = %d; want 3", len(got))
+	}
+	if got[0] != 2 {
+		t.Errorf("mappedSlice[0] = %d; want 1", got[0])
+	}
+	if got[1] != 4 {
+		t.Errorf("mappedSlice[0] = %d; want 3", got[1])
+	}
+	if got[2] != 7 {
+		t.Errorf("mappedSlice[0] = %d; want 6", got[2])
+	}
+}
+
+func TestFlatMap(t *testing.T) {
+	// call
+	got := FlatMap(
+		Of(1, 2, 4),
+		func(e int) *Stream[string] { return Of(fmt.Sprint(e)) },
+	).ToSlice()
+
+	// assert
+	if len(got) != 3 {
+		t.Errorf("len(FlatMap) = %d; want 7", len(got))
+	}
+	if got[0] != "1" {
+		t.Errorf("mappedSlice[0] = %v; want 1", got[0])
+	}
+	if got[1] != "2" {
+		t.Errorf("mappedSlice[0] = %v; want 3", got[1])
+	}
+	if got[2] != "4" {
+		t.Errorf("mappedSlice[0] = %v; want 6", got[2])
 	}
 }
 
@@ -223,6 +273,25 @@ func TestOnEach(t *testing.T) {
 	for _, elem := range got {
 		if elem != 1 {
 			t.Errorf("%d; want 1", elem)
+		}
+	}
+}
+func TestApplyOnEach(t *testing.T) {
+	// prepare
+	initSlice := []int{1, 1, 1}
+
+	// call
+	got := From(initSlice).
+		ApplyOnEach(func(it int) int { return it + 1 }).
+		ToSlice()
+
+	// assert
+	if len(got) != 3 {
+		t.Errorf("len(got) = %d; want 3", len(got))
+	}
+	for _, elem := range got {
+		if elem != 2 {
+			t.Errorf("%d; want 2", elem)
 		}
 	}
 }
@@ -527,5 +596,84 @@ func TestContains(t *testing.T) {
 	}
 	if containsSlice {
 		t.Errorf("containInt(\"[]int{1}\") = %v; want false", containsSlice)
+	}
+}
+
+func TestChunked(t *testing.T) {
+	// call
+	slice1 := Of(1, 2, 3, 4, 5, 6).Chunked(2)
+
+	// assert
+	if len(slice1) != 3 {
+		t.Errorf("Chunked(2) = %d; want 3", len(slice1))
+	}
+	for _, slice := range slice1 {
+		if len(slice) != 2 {
+			t.Errorf("Chunked(2) = %d; want 2", len(slice))
+		}
+	}
+}
+
+func TestChunkedOdd(t *testing.T) {
+	// call
+	slice1 := Of(1, 2, 3, 4, 5, 6, 7).Chunked(2)
+
+	// assert
+	if len(slice1) != 4 {
+		t.Errorf("Chunked(2) = %d; want 3", len(slice1))
+	}
+	if len(slice1[3]) != 1 {
+		t.Errorf("Chunked(2) = %d; want 4", len(slice1[3]))
+	}
+	for i := 0; i < len(slice1)-1; i++ {
+		if len(slice1[i]) != 2 {
+			t.Errorf("Chunked(2) = %d; want 2", len(slice1[i]))
+		}
+	}
+}
+
+func TestWindowed(t *testing.T) {
+	// call
+	slice1 := Of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15).Windowed(5, 3)
+
+	// assert
+	if len(slice1) != 4 {
+		t.Errorf("Windowed(5, 3) = %d; want 3", len(slice1))
+	}
+	for i := 0; i < len(slice1); i++ {
+		if len(slice1[i]) != 5 {
+			t.Errorf("Windowed(5, 3) = %d; want 5", len(slice1[i]))
+		}
+	}
+}
+
+func TestWindowedPartial(t *testing.T) {
+	// call
+	slice1 := Of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15).Windowed(5, 3, true)
+
+	// assert
+	if len(slice1) != 5 {
+		t.Errorf("Windowed(5, 3) = %d; want 3", len(slice1))
+	}
+	if len(slice1[4]) != 3 {
+		t.Errorf("Windowed(5, 3) = %d; want 3", len(slice1[4]))
+	}
+	for i := 0; i < len(slice1)-1; i++ {
+		if len(slice1[i]) != 5 {
+			t.Errorf("Windowed(5, 3) = %d; want 5", len(slice1[i]))
+		}
+	}
+}
+
+func TestWindowedBigWindow(t *testing.T) {
+	// call
+	slice1 := Of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15).Windowed(16, 3)
+
+	// assert
+	if len(slice1) != 1 {
+		t.Errorf("Windowed(16, 3) = %d; want 1", len(slice1))
+	}
+	if len(slice1[0]) != 15 {
+		t.Errorf("Windowed(16, 3) = %d; want 16", len(slice1[0]))
 	}
 }
