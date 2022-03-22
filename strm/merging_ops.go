@@ -7,14 +7,14 @@ func (s *Stream[T]) Plus(other *Stream[T]) *Stream[T] {
 	return From(append(merged, other.slice...))
 }
 
-// Append
+// Append appends the element of the given slice to this Stream
 func (s *Stream[T]) Append(elems []T) *Stream[T] {
 	s.filteredSlice()
 	s.slice = append(s.slice, elems...)
 	return s
 }
 
-// Merge
+// Merge merges the given Streams into a single one
 func Merge[T any](streams ...*Stream[T]) *Stream[T] {
 	lt := 0
 	for _, s := range streams {
