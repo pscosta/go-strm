@@ -7,10 +7,6 @@ import (
 type predicate[T any] func(v T) bool
 type mapper[IN any, OUT any] func(v IN) OUT
 type reducer[OUT any, IN any] func(OUT, IN) OUT
-type ordered interface {
-	~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 |
-		~uint32 | ~uint64 | ~uintptr | ~float32 | ~float64 | ~string
-}
 
 type Stream[T any] struct {
 	slice      []T

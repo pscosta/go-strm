@@ -1,6 +1,9 @@
 package strm
 
-import "reflect"
+import (
+	"golang.org/x/exp/constraints"
+	"reflect"
+)
 
 func (s *Stream[T]) OnEach(f func(T)) *Stream[T] {
 	for _, elem := range s.filteredSlice() {
@@ -16,7 +19,7 @@ func (s *Stream[T]) ApplyOnEach(f func(T) T) *Stream[T] {
 	return s
 }
 
-func Max[O ordered](s *Stream[O]) (max O) {
+func Max[O constraints.Ordered](s *Stream[O]) (max O) {
 	max = s.First()
 	for _, elem := range s.slice {
 		if elem > max {
@@ -26,7 +29,7 @@ func Max[O ordered](s *Stream[O]) (max O) {
 	return
 }
 
-func Min[O ordered](s *Stream[O]) (min O) {
+func Min[O constraints.Ordered](s *Stream[O]) (min O) {
 	min = s.First()
 	for _, elem := range s.slice {
 		if elem < min {
@@ -36,7 +39,7 @@ func Min[O ordered](s *Stream[O]) (min O) {
 	return
 }
 
-func Sum[O ordered](s *Stream[O]) (sum O) {
+func Sum[O constraints.Ordered](s *Stream[O]) (sum O) {
 	for _, elem := range s.slice {
 		sum += elem
 	}
