@@ -19,7 +19,7 @@ type Stream[T any] struct {
 func From[T any](backingSlice []T) *Stream[T] {
 	return &Stream[T]{
 		slice:      backingSlice,
-		streamType: reflect.TypeOf((*T)(nil)).Elem().Kind(),
+		streamType: typeOf[T](),
 	}
 }
 
@@ -73,7 +73,7 @@ func Reduce[IN any, OUT any](s *Stream[IN], f reducer[OUT, IN], start ...OUT) (o
 	if len(start) > 0 {
 		out = start[0]
 	}
-	for _, elem := range s.slice {
+	for _, elem := range s.filteredSlice() {
 		out = f(out, elem)
 	}
 	return out
@@ -91,6 +91,10 @@ func GroupBy[K comparable, V any](s *Stream[V], keySelector func(V) K) map[K][]V
 
 // Internal Ops
 
+func typeOf[T any]() reflect.Kind {
+	return reflect.TypeOf((*T)(nil)).Elem().Kind()
+}
+
 func (s *Stream[T]) filteredSlice() []T {
 	applyFilters(&(s.slice), s.filters)
 	s.filters = nil
@@ -98,6 +102,9 @@ func (s *Stream[T]) filteredSlice() []T {
 }
 
 func applyFilters[T any](slice *[]T, filters []predicate[T]) {
+	if len(filters) == 0 {
+		return
+	}
 	i := 0
 filtering:
 	for _, elem := range *slice {
