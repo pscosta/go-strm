@@ -5,6 +5,8 @@ import (
 	"reflect"
 )
 
+// OnEach executes the given [action] on each element and returns the unchanged Stream afterwards.
+// used mainly for debugging purposes.
 func (s *Stream[T]) OnEach(f func(T)) *Stream[T] {
 	for _, elem := range s.filteredSlice() {
 		f(elem)
@@ -12,10 +14,36 @@ func (s *Stream[T]) OnEach(f func(T)) *Stream[T] {
 	return s
 }
 
-func (s *Stream[T]) ApplyOnEach(f func(T) T) *Stream[T] {
+// ApplyOnEach Applies the given [action] on each element of the backing slice returns the Stream afterwards.
+// Similar to Map, but the returning type of the given [action] but math this Stream's type
+func (s *Stream[T]) ApplyOnEach(action func(T) T) *Stream[T] {
 	for i, elem := range s.filteredSlice() {
-		s.slice[i] = f(elem)
+		s.slice[i] = action(elem)
 	}
+	return s
+}
+
+// Take Returns this Stream containing first [n] elements.
+// [n] must be positive.
+func (s *Stream[T]) Take(n int) *Stream[T] {
+	if n == 0 || len(s.filteredSlice()) <= n {
+		return s
+	}
+	s.slice = s.slice[:n]
+	return s
+}
+
+// Drop Returns this Stream containing all elements except first [n] elements.
+// [n] must be positive.
+func (s *Stream[T]) Drop(n int) *Stream[T] {
+	if n == 0 {
+		return s
+	}
+	if len(s.filteredSlice()) <= n {
+		// the nil slice is the preferred way
+		s.slice = nil
+	}
+	s.slice = s.slice[n:]
 	return s
 }
 
@@ -40,29 +68,30 @@ func Min[O constraints.Ordered](s *Stream[O]) (min O) {
 }
 
 func Sum[O constraints.Ordered](s *Stream[O]) (sum O) {
-	for _, elem := range s.slice {
+	for _, elem := range s.filteredSlice() {
 		sum += elem
 	}
 	return
 }
 
-// Reversed reverses the backing slice
+// Reversed reverses the elements order of this Stream
 func (s *Stream[T]) Reversed() *Stream[T] {
-	s.filteredSlice()
-	for i := len(s.slice)/2 - 1; i >= 0; i-- {
+	for i := len(s.filteredSlice())/2 - 1; i >= 0; i-- {
 		opp := len(s.slice) - 1 - i
 		s.slice[i], (s.slice)[opp] = (s.slice)[opp], (s.slice)[i]
 	}
 	return s
 }
 
-// Distinct In-place deduplication of the backing slice
+// Distinct In-place deduplication of the backing slice, guided with a map.
+// Streams of structs, pointers and primitive types are correctly de-duped
 func (s *Stream[T]) Distinct() *Stream[T] {
 	var keySelector func(t T) any
 
 	// decides whether to compare pointers or values
 	switch s.streamType {
 	case reflect.Array, reflect.Slice, reflect.Func, reflect.Map:
+		// this is a hack to allow for key hashing over mutable/container types
 		keySelector = func(t T) any { return &t }
 	default:
 		keySelector = func(t T) any { return t }
@@ -83,13 +112,14 @@ func (s *Stream[T]) Distinct() *Stream[T] {
 	return s
 }
 
-// Contains In-place deduplication of the backing slice
-func (s *Stream[T]) Contains(t T) bool {
+// Contains Returns true if [element] is found in the Stream.
+// Only works for Streams of structs, pointers and primitive types
+func (s *Stream[T]) Contains(element T) bool {
 	var valSelector func(t T) any
 
-	// always return false for container types
 	switch s.streamType {
 	case reflect.Array, reflect.Slice, reflect.Func, reflect.Map:
+		// always return false for mutable/container types
 		return false
 	default:
 		valSelector = func(t T) any { return t }
@@ -97,7 +127,7 @@ func (s *Stream[T]) Contains(t T) bool {
 
 	// O(n) search
 	for _, a := range s.filteredSlice() {
-		if valSelector(a) == valSelector(t) {
+		if valSelector(a) == valSelector(element) {
 			return true
 		}
 	}
