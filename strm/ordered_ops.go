@@ -47,6 +47,7 @@ func (s *Stream[T]) Drop(n int) *Stream[T] {
 	return s
 }
 
+// Max Returns the largest element of the Ordered constrained Stream.
 func Max[O constraints.Ordered](s *Stream[O]) (max O) {
 	max = s.First()
 	for _, elem := range s.slice {
@@ -57,6 +58,7 @@ func Max[O constraints.Ordered](s *Stream[O]) (max O) {
 	return
 }
 
+// Min Returns the smallest element of the Ordered constrained Stream.
 func Min[O constraints.Ordered](s *Stream[O]) (min O) {
 	min = s.First()
 	for _, elem := range s.slice {
@@ -67,6 +69,7 @@ func Min[O constraints.Ordered](s *Stream[O]) (min O) {
 	return
 }
 
+// Sum Returns the sum of all elements in this Ordered constrained Stream.
 func Sum[O constraints.Ordered](s *Stream[O]) (sum O) {
 	for _, elem := range s.filteredSlice() {
 		sum += elem
@@ -89,7 +92,7 @@ func (s *Stream[T]) Distinct() *Stream[T] {
 	var keySelector func(t T) any
 
 	// decides whether to compare pointers or values
-	switch s.streamType {
+	switch s.streamKind {
 	case reflect.Array, reflect.Slice, reflect.Func, reflect.Map:
 		// this is a hack to allow for key hashing over mutable/container types
 		keySelector = func(t T) any { return &t }
@@ -117,7 +120,7 @@ func (s *Stream[T]) Distinct() *Stream[T] {
 func (s *Stream[T]) Contains(element T) bool {
 	var valSelector func(t T) any
 
-	switch s.streamType {
+	switch s.streamKind {
 	case reflect.Array, reflect.Slice, reflect.Func, reflect.Map:
 		// always return false for mutable/container types
 		return false
