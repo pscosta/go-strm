@@ -104,12 +104,11 @@ func (s *Stream[T]) Distinct() *Stream[T] {
 	j := 0
 
 	for i := 0; i < len(s.slice); i++ {
-		if _, prs := keys[keySelector(s.slice[i])]; prs {
+		if _, ok := keys[keySelector(s.slice[i])]; ok {
 			continue
 		}
 		keys[keySelector(s.slice[i])] = struct{}{}
-		s.slice[j] = s.slice[i]
-		j++
+		s.slice[j], j = s.slice[i], j+1
 	}
 	s.slice = s.slice[:j]
 	return s
