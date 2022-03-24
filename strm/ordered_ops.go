@@ -26,7 +26,12 @@ func (s *Stream[T]) ApplyOnEach(action func(T) T) *Stream[T] {
 // Take Returns this Stream containing first [n] elements.
 // [n] must be positive.
 func (s *Stream[T]) Take(n int) *Stream[T] {
-	if n == 0 || len(s.filteredSlice()) <= n {
+	if len(s.filteredSlice()) <= n {
+		return s
+	}
+	if n == 0 {
+		// the nil slice is the preferred way
+		s.slice = nil
 		return s
 	}
 	s.slice = s.slice[:n]
@@ -42,6 +47,7 @@ func (s *Stream[T]) Drop(n int) *Stream[T] {
 	if len(s.filteredSlice()) <= n {
 		// the nil slice is the preferred way
 		s.slice = nil
+		return s
 	}
 	s.slice = s.slice[n:]
 	return s
