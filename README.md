@@ -13,44 +13,51 @@ This limitation forces mapping functions, whose input and return type differs, t
 limiting their chaining capacity and compromising readability. 
 Despite this limitation, some of the most common functional programming techniques are still possible to be implemented 
 in Go, as samples bellow illustrate.
-
-
+All the api operations are [enumerated here](#API Operations Listing)
 ### Generic Usage
 
-#### Building from elements
+This api is a wrapper os its inputs, either a slice or a set of elements of a generic type.
+This wrapper is internally backed from a slice - either passed explicitly by a constructor or created on the fly if, 
+built by a set of elements - providing a set of operations applied over the contents of its backing slice, 
+all implemented aiming minimal memory allocation, hence never allocating intermediate slices.
 
+### Building from elements
+##### Creates a strm backed by slice containing the given elements
 ```go
 stringStrm := strm.Of("Hey!", "Hello!", "Hi!")
 intStrm := strm.Of(1, 2, 3, 4)
 sliceStrm := strm.Of([]int{1}, []int{1, 2}, []int{1, 2, 3})
 ```
 
-#### Building from slices
-
+### Building from a slice
+##### The `backingSlice` state will be modified by the operation applied to the strm
 ```go
-slice := []int {1, 2, 3}
-intStrm := strm.From(slice)
+backingSlice := []int {1, 2, 3}
+intStrm := strm.From(backingSlice)
 ```
 
-#### Building from copy slices
+### Building from a copy of a slice
+##### The strm will create its own `backing slice`, which will be a copy of the `initSlice`. The `initSlice` state remain unmodified, independent of the operation applied to the strm.
 
 ```go
-slice := []int {1, 2, 3}
-intStrm := strm.CopyFrom(slice)
+initSlice := []int {1, 2, 3}
+intStrm := strm.CopyFrom(initSlice)
 ```
 
-#### Converting back to slices
+### Converting back to a slice
+##### The `backingSlice` will be returned after all the operations have been applied to the strm
 
 ```go
-intSlice := strm.Of(1, 2, 3, 4).ToSlice()
+slice := strm.Of(1, 2, 3, 4).ToSlice()
 ```
 
+### Generic Operations
 #### Filtering
 
 ```go
-// Filtering a strm
 isEven := func(n int) bool { return n%2 == 0 }
 
+// Filtering even elements
 // evenSlice -> [2 4]
 evenSlice := strm.Of(1, 2, 3, 4, 5).
     Filter(isEven).
@@ -67,22 +74,22 @@ evenSlice := strm.Of(1, 2, 3, 4, 5).
 #### Iterating
 
 ```go
+// iterating over all elements
+// prints -> n: 2;   n: 4;   
+strm.Of(1, 2, 3, 4, 5).
+    Filter(isEven).
+    ForEach(func(n int) { fmt.Printf("n: %v;\t", n) })
+
 // printing each element and filtering
 // prints -> n: 1
 //           n: 2
 //           even: 2
 // slice -> [2]
 slice := strm.Of(1, 2).
-	OnEach(func(n int) { fmt.Printf("n: %v\n", n) }).
-	Filter(isEven).
-	OnEach(func(n int) { fmt.Printf("even: %v\n", n) }).
-	ToSlice()
-
-// iterating over all elements
-// prints -> n: 2;   n: 4;   
-strm.Of(1, 2, 3, 4, 5).
+    OnEach(func(n int) { fmt.Printf("n: %v\n", n) }).
     Filter(isEven).
-    ForEach(func(n int) { fmt.Printf("n: %v;\t", n) })
+    OnEach(func(n int) { fmt.Printf("even: %v\n", n) }).
+    ToSlice()
 ```
 
 #### Mapping
@@ -104,6 +111,48 @@ names := strm.
     ToSlice()
 ```
 
+#### Mapping & Reducing
+
+```go
+slices := [][]int{{1}, {1, 2}, {1, 2, 3}}
+
+// sums -> [1 3 6]
+sums := Map(
+    From(slices),
+    func(it []int) int { return Reduce(From(it), func(a int, b int) int { return a + b }) },
+).ToSlice()
+
+// sums -> [1 3 6]
+sums := Map(
+    From(slices),
+    func(it []int) int { return Sum(From(it)) },
+).ToSlice()
+
+// mins -> [1 1 1]
+mins := Map(
+    From(slices),
+    func(it []int) int { return Min(From(it)) },
+).ToSlice()
+
+// maxs -> [1 2 3]
+maxs := Map(
+    From(slices),
+    func(it []int) int { return Max(From(it)) },
+).ToSlice()
+```
+
+#### Grouping 
+
+````go
+people := strm.Of(Person{"Tim", 30}, Person{"Bil", 40}, Person{"John", 30}, Person{"Tim", 35})
+
+// byAge -> map[30:[{Tim 30} {John 30}] 35:[{Tim 35}] 40:[{Bil 40}]]
+byAge := strm.GroupBy(people, func(it Person) int { return it.age })
+
+// byName -> map[Bil:[{Bil 40}] John:[{John 30}] Tim:[{Tim 30} {Tim 35}]]
+byName := strm.GroupBy(people, func(it Person) string { return it.name })
+````
+
 #### De-duping and Reversing
 
 ```go
@@ -123,7 +172,7 @@ reversed := strm.Of(1, 2, 3, 4, 5, 6).
     ToSlice()
 ```
 
-#### Usual terminal operations
+#### The usual terminal operations
 
 ```go
 // all -> false
@@ -157,7 +206,6 @@ countBy := strm.Of(1, 2, 3, 4, 5).
 // contains -> true 
 contains := strm.Of(Person{"Peter", 18}, Person{"John", 30}, Person{"Bruce", 48}).
 	Contains(Person{"Bruce", 48})
-
 
 // names -> Peter,John,Sarah,Kate
 people := strm.From([]Person{{"Peter", 30}, {"John", 18}, {"Sarah", 16}, {"Kate", 16}})
@@ -209,3 +257,50 @@ drop := strm.Of(0, 1, 2, 3).
 	Drop(1).
 	ToSlice()
 ````
+
+### API Operations Listing 
+
+```go
+// Constructors	
+func Of[T any](elems ...T) *Stream[T]
+func From[T any](backingSlice []T) *Stream[T]
+func CopyFrom[T any](slice []T) *Stream[T]
+
+// Top-Level functions
+func Map[IN any, OUT any](s *Stream[IN], f func(IN) OUT) *Stream[OUT]
+func FlatMap[IN any, OUT any](s *Stream[IN], f func(v IN) *Stream[OUT]) *Stream[OUT]
+func Reduce[IN any, OUT any](s *Stream[IN], f reducer[OUT, IN], start ...OUT) OUT
+func GroupBy[K comparable, V any](s *Stream[V], keySelector func(V) K) map[K][]V
+func Max[O Ordered](s *Stream[O]) O
+func Min[O Ordered](s *Stream[O]) O
+func Sum[O Ordered](s *Stream[O]) O
+func Merge[T any](streams ...*Stream[T]) *Stream[T]
+func Append(elems []T) *Stream[T]
+
+// strm operations
+func Filter(predicate func(T) bool) *Stream[T]
+func ApplyOnEach(action func(T) T) *Stream[T]
+func OnEach(f func(T)) *Stream[T]
+func Plus(other *Stream[T]) *Stream[T]
+func Take(n int) *Stream[T]
+func Drop(n int) *Stream[T]
+func Reversed() *Stream[T]
+func Distinct() *Stream[T]
+
+// Terminal strm operations
+func ToSlice() []T
+func ForEach(action func(T))
+func Any(predicate func(T) bool) bool
+func All(predicate func(T) bool) bool
+func None(predicate func(T) bool) bool
+func Count() int
+func CountBy(predicate func(T) bool) int
+func SumBy(selector func(T) int) int
+func FirstBy(predicate func(T) bool) T
+func First() T
+func Last() T
+func Contains(element T) bool
+func JoinToString(delimiter string) string
+func Chunked(batchSize int) [][]T
+func Windowed(size int, step int, partialWindows ...bool) [][]T
+```
