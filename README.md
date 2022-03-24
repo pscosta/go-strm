@@ -12,7 +12,7 @@ The current Generics' implementation in Go 1.18 don't allow methods themselves t
 This limitation forces mapping functions, whose input and return type differs, to be defined as top-level, 
 limiting their chaining capacity and compromising readability. 
 Despite this limitation, some of the most common functional programming techniques are still possible to be implemented 
-in Go, as the bellow samples illustrate.
+in Go, as samples bellow illustrate.
 
 
 ### Generic Usage
