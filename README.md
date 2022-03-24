@@ -13,7 +13,9 @@ This limitation forces mapping functions, whose input and return type differs, t
 limiting their chaining capacity and compromising readability. 
 Despite this limitation, some of the most common functional programming techniques are still possible to be implemented 
 in Go, as samples bellow illustrate.
-All the api operations are [enumerated here](#api-operations-listing)
+
+All available Api operations are [enumerated here](#api-operations-listing).
+
 ### Generic Usage
 
 This api is a wrapper os its inputs, either a slice or a set of elements of a generic type.
