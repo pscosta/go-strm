@@ -141,6 +141,12 @@ maxs := Map(
     From(slices),
     func(it []int) int { return Max(From(it)) },
 ).ToSlice()
+
+// flatSlice -> [1 2 4 6 14 1 2]
+flatSlice := FlatMap(
+    From(slices),
+    func(it []int) *strm.Stream[int] { return From(it) },
+).ToSlice()
 ```
 
 #### Grouping 
