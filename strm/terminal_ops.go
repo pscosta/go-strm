@@ -2,6 +2,7 @@ package strm
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 )
 
@@ -89,6 +90,28 @@ func (s *Stream[T]) Last() (t T) {
 		return
 	}
 	return s.slice[len(s.slice)-1]
+}
+
+// Contains Returns true if [element] is found in the Stream.
+// Only works for Streams of structs, pointers and primitive types
+func (s *Stream[T]) Contains(element T) bool {
+	var valSelector func(t T) any
+
+	switch s.streamKind {
+	case reflect.Array, reflect.Slice, reflect.Func, reflect.Map:
+		// always return false for unhashable types
+		return false
+	default:
+		valSelector = func(t T) any { return t }
+	}
+
+	// O(n) search
+	for _, a := range s.filteredSlice() {
+		if valSelector(a) == valSelector(element) {
+			return true
+		}
+	}
+	return false
 }
 
 // JoinToString Creates a string from all the elements separated using [separator].

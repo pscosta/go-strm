@@ -94,7 +94,7 @@ func (s *Stream[T]) Distinct() *Stream[T] {
 	// decides whether to compare pointers or values
 	switch s.streamKind {
 	case reflect.Array, reflect.Slice, reflect.Func, reflect.Map:
-		// this is a hack to allow for key hashing over mutable/container types
+		// this is a hack to allow for key hashing over unhashable types
 		keySelector = func(t T) any { return &t }
 	default:
 		keySelector = func(t T) any { return t }
@@ -112,28 +112,6 @@ func (s *Stream[T]) Distinct() *Stream[T] {
 	}
 	s.slice = s.slice[:j]
 	return s
-}
-
-// Contains Returns true if [element] is found in the Stream.
-// Only works for Streams of structs, pointers and primitive types
-func (s *Stream[T]) Contains(element T) bool {
-	var valSelector func(t T) any
-
-	switch s.streamKind {
-	case reflect.Array, reflect.Slice, reflect.Func, reflect.Map:
-		// always return false for mutable/container types
-		return false
-	default:
-		valSelector = func(t T) any { return t }
-	}
-
-	// O(n) search
-	for _, a := range s.filteredSlice() {
-		if valSelector(a) == valSelector(element) {
-			return true
-		}
-	}
-	return false
 }
 
 // Chunked Splits this Stream into several slices each not exceeding the given [size]

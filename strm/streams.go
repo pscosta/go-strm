@@ -4,10 +4,12 @@ import (
 	"reflect"
 )
 
+// internal types
 type predicate[T any] func(v T) bool
 type mapper[IN any, OUT any] func(v IN) OUT
 type reducer[OUT any, IN any] func(OUT, IN) OUT
 
+// Stream The Main struct
 type Stream[T any] struct {
 	slice      []T
 	filters    []predicate[T]
@@ -28,11 +30,11 @@ func From[T any](backingSlice []T) *Stream[T] {
 // CopyFrom Creates a new Stream backed by a copy of the elements in the given [slice]
 // the state of the given slice will be preserved
 func CopyFrom[T any](slice []T) *Stream[T] {
-	copySlice := make([]T, len(slice))
-	copy(copySlice, slice)
+	sliceCopy := make([]T, len(slice))
+	copy(sliceCopy, slice)
 
 	return &Stream[T]{
-		slice:      copySlice,
+		slice:      sliceCopy,
 		streamKind: reflect.TypeOf((*T)(nil)).Elem().Kind(),
 	}
 }
