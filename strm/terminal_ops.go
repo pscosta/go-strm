@@ -28,7 +28,7 @@ func (s *Stream[T]) Any(p predicate[T]) bool {
 	return false
 }
 
-// All Returns `true` if all elements match the given predicate.
+// All Returns true if all elements match the given predicate.
 func (s *Stream[T]) All(p predicate[T]) bool {
 	for _, elem := range s.filteredSlice() {
 		if !p(elem) {
@@ -93,7 +93,7 @@ func (s *Stream[T]) Last() (t T) {
 }
 
 // Contains Returns true if [element] is found in the Stream.
-// Only works for Streams of structs, pointers and primitive types
+// Works for Streams of hashtable types like structs, pointers and primitive types
 func (s *Stream[T]) Contains(element T) bool {
 	var valSelector func(t T) any
 

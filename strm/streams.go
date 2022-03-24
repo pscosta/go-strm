@@ -109,16 +109,19 @@ func GroupBy[K comparable, V any](s *Stream[V], keySelector func(V) K) map[K][]V
 
 // Internal Ops
 
+// returns the King of the given generic type
 func typeOf[T any]() reflect.Kind {
 	return reflect.TypeOf((*T)(nil)).Elem().Kind()
 }
 
+// returns the filtered backing slice after applying all registered filters
 func (s *Stream[T]) filteredSlice() []T {
 	applyFilters(&(s.slice), s.filters)
 	s.filters = nil
 	return s.slice
 }
 
+// Applies all lazy filters to the Stream
 func applyFilters[T any](slice *[]T, filters []predicate[T]) {
 	if len(filters) == 0 {
 		return
