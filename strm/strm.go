@@ -52,7 +52,7 @@ func Of[T any](elems ...T) *Stream[T] {
 // Main functions
 
 // Filter Returns a Stream containing only elements matching the given [predicate].
-// This operation is lazy and will be applied only upon calling a terminal operation on this Stream
+// This operation is lazy and will be applied only upon calling a terminal operation on the Stream
 func (s *Stream[T]) Filter(p predicate[T]) *Stream[T] {
 	s.filters = append(s.filters, p)
 	return s
