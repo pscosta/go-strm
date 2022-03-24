@@ -14,7 +14,9 @@ func (s *Stream[T]) Append(elems []T) *Stream[T] {
 	return s
 }
 
-// Merge merges the given Streams into a single one
+// Merge merges the given [streams] into a single one
+// Allocates the required memory for resulting Stream
+// and the contents of the given [streams] are appended to the merged one
 func Merge[T any](streams ...*Stream[T]) *Stream[T] {
 	lt := 0
 	for _, s := range streams {

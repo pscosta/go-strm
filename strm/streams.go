@@ -129,8 +129,7 @@ filtering:
 				continue filtering
 			}
 		}
-		(*slice)[i] = elem
-		i++
+		(*slice)[i], i = elem, i+1
 	}
 	// garbage-collects the unfiltered elements
 	for j := i; j < len(*slice); j++ {

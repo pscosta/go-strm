@@ -2,6 +2,7 @@ package strm
 
 import (
 	"fmt"
+	"strings"
 )
 
 // ToSlice returns a Slice containing all the elements of this Stream
@@ -90,13 +91,15 @@ func (s *Stream[T]) Last() (t T) {
 	return s.slice[len(s.slice)-1]
 }
 
-// JoinToString Creates a string from all the elements separated using [separator]
-func (s *Stream[T]) JoinToString(delimiter string) (joined string) {
+// JoinToString Creates a string from all the elements separated using [separator].
+// makes use of fmt.Sprint() to dynamically convert the incoming generic type T to a string representation
+func (s *Stream[T]) JoinToString(delimiter string) string {
+	var sb strings.Builder
 	for i := 0; i < len(s.filteredSlice()); i++ {
-		joined += fmt.Sprint(s.slice[i])
+		sb.WriteString(fmt.Sprint(s.slice[i]))
 		if i+1 < len(s.slice) {
-			joined += delimiter
+			sb.WriteString(delimiter)
 		}
 	}
-	return
+	return sb.String()
 }
