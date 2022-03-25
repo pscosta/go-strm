@@ -150,10 +150,10 @@ flatSlice := FlatMap(
 ```
 
 #### Parallel Mapping
-A `PMap` function is available for applying the given mapping function over all stream elements in parallel. The `PMap`
-usage is similar to `Map`. By default, the parallel work is batched by number of available CPU cores. If
-the `noBatching` flag is provided, `PMap` will launch a new goroutine per each element present in the given Stream - not
-recommended for very large Streams due to potentially large memory footprint.
+A `PMap` function is available for applying the given mapping function over all stream elements in parallel, leveraging
+goroutines. The `PMap` usage is similar to `Map`. By default, the parallel work is batched by number of available CPU
+cores. If the `noBatching` flag is provided, `PMap` will launch a new goroutine per each element present in the given
+Stream - not recommended for very large Streams due to potentially large memory footprint.
 
 ```go
 people := []Person{{"Peter", 30}, {"John", 18}, {"Sarah", 16}, {"Kate", 16}}
