@@ -133,7 +133,7 @@ func (s *Stream[T]) Chunked(batchSize int) [][]T {
 }
 
 // Windowed Returns a slice of slices of the window of the given size, sliding along this Stream with the given [step].
-// Several last slices may have fewer elements than the given [size].
+// Several last slices may have fewer elements than the given [size]. Individual windows don't share backing arrays.
 // Both [size] and [step] must be positive and can be greater than the number of elements in this Stream.
 //	 size: the number of elements to take in each window
 // 	 step: the number of elements to move the window forward by on each step
