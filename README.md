@@ -8,7 +8,7 @@ providing a functional oriented Map/Reduce api in Go.
 This api leverages Go Generics for providing a set of higher-order Map/Reduce functions.
 These functions, when chained together, allow for functional programming techniques that ultimately reduce code
 duplication and make it easier to transform and iterate over collections of elements. 
-The current Generics implementation in Go 1.18 doens't allow methods themselves to have additional type parameters. 
+The current Generics implementation in Go 1.18 doesn't allow methods themselves to have additional type parameters. 
 This limitation forces mapping functions, whose input and return type differs, to be defined as top-level, 
 limiting their chaining capacity and compromising readability. 
 Despite this limitation, some of the most common functional programming techniques are still possible to be implemented 
@@ -149,6 +149,28 @@ flatSlice := FlatMap(
 ).ToSlice()
 ```
 
+#### Parallel Mapping
+A `PMap` function is available for applying the given mapping function over all stream elements in parallel. The `PMap`
+usage is similar to `Map`. By default, the parallel work is batched by number of available CPU cores. If
+the `noBatching` flag is provided, `PMap` will launch a new goroutine per each element present in the given Stream - not
+recommended for very large Streams due to potentially large memory footprint.
+
+```go
+people := []Person{{"Peter", 30}, {"John", 18}, {"Sarah", 16}, {"Kate", 16}}
+
+// maps a strm of (Person) to a slice of Person.name (string) in parallel 
+// names -> [Peter John Sarah Kate]
+names := strm.
+    PMap(strm.From(people), func(p Person) string { return p.name }).
+    ToSlice()
+
+// maps a strm of (Person) to a slice of Person.name (string) in parallel without batching
+// names -> [Peter John Sarah Kate]
+names := strm.
+    PMap(strm.From(people), func(p Person) string { return p.name }, true).
+    ToSlice()
+```
+
 #### Grouping 
 
 ````go
@@ -276,6 +298,7 @@ func CopyFrom[T any](slice []T) *Stream[T]
 
 // Top-Level functions
 func Map[IN any, OUT any](s *Stream[IN], f func(IN) OUT) *Stream[OUT]
+func PMap[IN any, OUT any](s *Stream[IN], f func(IN) OUT) *Stream[OUT]
 func FlatMap[IN any, OUT any](s *Stream[IN], f func(v IN) *Stream[OUT]) *Stream[OUT]
 func Reduce[IN any, OUT any](s *Stream[IN], f reducer[OUT, IN], start ...OUT) OUT
 func GroupBy[K comparable, V any](s *Stream[V], keySelector func(V) K) map[K][]V

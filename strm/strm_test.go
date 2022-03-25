@@ -67,6 +67,57 @@ func TestMapReduce(t *testing.T) {
 	}
 }
 
+func TestParallelLinearMapReduce(t *testing.T) {
+	// prepare
+	initSlice := [][]int{{1}, {1, 2}, {1, 2, 3}}
+
+	// call
+	got := PMap(
+		From(initSlice),
+		func(it []int) int { return Reduce(From(it), func(a int, b int) int { return a + b }) },
+		true,
+	).ToSlice()
+
+	// assert
+	if len(got) != 3 {
+		t.Errorf("len(mappedSlice) = %d; want 3", len(got))
+	}
+	if got[0] != 1 {
+		t.Errorf("mappedSlice[0] = %d; want 1", got[0])
+	}
+	if got[1] != 3 {
+		t.Errorf("mappedSlice[0] = %d; want 3", got[0])
+	}
+	if got[2] != 6 {
+		t.Errorf("mappedSlice[0] = %d; want 6", got[0])
+	}
+}
+
+func TestParallelBatchedMapReduce(t *testing.T) {
+	// prepare
+	initSlice := [][]int{{1}, {1, 2}, {1, 2, 3}}
+
+	// call
+	got := PMap(
+		From(initSlice),
+		func(it []int) int { return Reduce(From(it), func(a int, b int) int { return a + b }) },
+	).ToSlice()
+
+	// assert
+	if len(got) != 3 {
+		t.Errorf("len(mappedSlice) = %d; want 3", len(got))
+	}
+	if got[0] != 1 {
+		t.Errorf("mappedSlice[0] = %d; want 1", got[0])
+	}
+	if got[1] != 3 {
+		t.Errorf("mappedSlice[0] = %d; want 3", got[0])
+	}
+	if got[2] != 6 {
+		t.Errorf("mappedSlice[0] = %d; want 6", got[0])
+	}
+}
+
 func TestMapReduceWithStart(t *testing.T) {
 	// prepare
 	initSlice := [][]int{{1}, {1, 2}, {1, 2, 3}}
