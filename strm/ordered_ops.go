@@ -153,7 +153,9 @@ func (s *Stream[T]) Windowed(size int, step int, partialWindows ...bool) [][]T {
 
 	winSize := step
 	for i, j := 0, size; j <= len(s.slice) && i <= len(s.slice) && i < j; i, j = i+step, j+winSize {
-		res = append(res, s.slice[i:j])
+		window := make([]T, len(s.slice[i:j]))
+		copy(window, s.slice[i:j])
+		res = append(res, window)
 		if (len(s.slice)-j) < winSize && partialWin {
 			winSize, j = 0, len(s.slice)
 		}
