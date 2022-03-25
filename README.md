@@ -8,7 +8,7 @@ providing a functional oriented Map/Reduce api in Go.
 This api leverages Go Generics for providing a set of higher-order Map/Reduce functions.
 These functions, when chained together, allow for functional programming techniques that ultimately reduce code
 duplication and make it easier to transform and iterate over collections of elements. 
-The current Generics implementation in Go 1.18 doesn't allow methods themselves to have additional type parameters. 
+The current Generics' implementation in Go 1.18 doesn't allow methods themselves to have additional type parameters. 
 This limitation forces mapping functions, whose input and return type differs, to be defined as top-level, 
 limiting their chaining capacity and compromising readability. 
 Despite this limitation, some of the most common functional programming techniques are still possible to be implemented 
