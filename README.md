@@ -18,10 +18,10 @@ All available Api operations are [enumerated here](#api-operations-listing).
 
 ### Generic Usage
 
-This api is a wrapper os its inputs, either a slice or a set of elements of a generic type.
-This wrapper is internally backed from a slice - either passed explicitly by a constructor or created on the fly if, 
-built by a set of elements - providing a set of operations applied over the contents of its backing slice, 
-all implemented aiming minimal memory allocation, hence never allocating intermediate slices.
+This api is a wrapper of its inputs, either a slice or a set of elements of a generic type.
+This wrapper is internally backed from a slice - either passed explicitly by a constructor or created on the fly if 
+built by a set of elements - providing a set of operations applied over the contents of its backing slice. 
+All operations have been implemented aiming minimal memory allocation, hence never allocating intermediate slices.
 
 ### Building from elements
 ##### Creates a strm backed by slice containing the given elements
