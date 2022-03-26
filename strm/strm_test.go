@@ -2,25 +2,22 @@ package strm
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestOf(t *testing.T) {
 	// call
-	stream := Of(1, 2, 3)
+	slice := Of(1, 2, 3).ToSlice()
 	// assert
-	if got := stream.ToSlice(); len(got) != 3 {
-		t.Errorf("len(stream) = %d; want 3", len(got))
-	}
+	assert.Equal(t, 3, len(slice), "wrong length")
 }
 
 func TestFrom(t *testing.T) {
 	// call
-	stream := From([][]int{{1}, {1, 2}, {1, 2, 3}})
+	slice := From([][]int{{1}, {1, 2}, {1, 2, 3}}).ToSlice()
 	// assert
-	if got := stream.ToSlice(); len(got) != 3 {
-		t.Errorf("len(stream) = %d; want 3", len(got))
-	}
+	assert.Equal(t, 3, len(slice), "wrong length")
 }
 
 func TestFilterCopyFrom(t *testing.T) {
@@ -30,16 +27,12 @@ func TestFilterCopyFrom(t *testing.T) {
 	got := CopyFrom(initSlice).
 		Filter(func(it []int) bool { return len(it) > 2 }).
 		ToSlice()
+	initSlice[0] = []int{1, 2}
+
 	// assert
-	if len(got) != 1 {
-		t.Errorf("len(initSlice) = %d; want 1", len(got))
-	}
-	if len(initSlice) != 3 {
-		t.Errorf("len(initSlice) = %d; want 3", len(initSlice))
-	}
-	if len(got[0]) != 3 {
-		t.Errorf("len(initSlice(0)) = %v; want 3", len(got[0]))
-	}
+	assert.Equal(t, 1, len(got), "wrong length")
+	assert.Equal(t, 3, len(initSlice), "wrong length")
+	assert.Equal(t, 3, len(got[0]), "wrong length")
 }
 
 func TestMapReduce(t *testing.T) {
@@ -53,18 +46,10 @@ func TestMapReduce(t *testing.T) {
 	).ToSlice()
 
 	// assert
-	if len(got) != 3 {
-		t.Errorf("len(mappedSlice) = %d; want 3", len(got))
-	}
-	if got[0] != 1 {
-		t.Errorf("mappedSlice[0] = %d; want 1", got[0])
-	}
-	if got[1] != 3 {
-		t.Errorf("mappedSlice[0] = %d; want 3", got[0])
-	}
-	if got[2] != 6 {
-		t.Errorf("mappedSlice[0] = %d; want 6", got[0])
-	}
+	assert.Equal(t, 3, len(got), "wrong length")
+	assert.Equal(t, 1, got[0], "wrong value")
+	assert.Equal(t, 3, got[1], "wrong value")
+	assert.Equal(t, 6, got[2], "wrong value")
 }
 
 func TestParallelLinearMapReduce(t *testing.T) {
@@ -79,18 +64,10 @@ func TestParallelLinearMapReduce(t *testing.T) {
 	).ToSlice()
 
 	// assert
-	if len(got) != 3 {
-		t.Errorf("len(mappedSlice) = %d; want 3", len(got))
-	}
-	if got[0] != 1 {
-		t.Errorf("mappedSlice[0] = %d; want 1", got[0])
-	}
-	if got[1] != 3 {
-		t.Errorf("mappedSlice[0] = %d; want 3", got[0])
-	}
-	if got[2] != 6 {
-		t.Errorf("mappedSlice[0] = %d; want 6", got[0])
-	}
+	assert.Equal(t, 3, len(got), "wrong length")
+	assert.Equal(t, 1, got[0], "wrong value")
+	assert.Equal(t, 3, got[1], "wrong value")
+	assert.Equal(t, 6, got[2], "wrong value")
 }
 
 func TestParallelBatchedMapReduce(t *testing.T) {
@@ -104,18 +81,10 @@ func TestParallelBatchedMapReduce(t *testing.T) {
 	).ToSlice()
 
 	// assert
-	if len(got) != 3 {
-		t.Errorf("len(mappedSlice) = %d; want 3", len(got))
-	}
-	if got[0] != 1 {
-		t.Errorf("mappedSlice[0] = %d; want 1", got[0])
-	}
-	if got[1] != 3 {
-		t.Errorf("mappedSlice[0] = %d; want 3", got[0])
-	}
-	if got[2] != 6 {
-		t.Errorf("mappedSlice[0] = %d; want 6", got[0])
-	}
+	assert.Equal(t, 3, len(got), "wrong length")
+	assert.Equal(t, 1, got[0], "wrong value")
+	assert.Equal(t, 3, got[1], "wrong value")
+	assert.Equal(t, 6, got[2], "wrong value")
 }
 
 func TestMapReduceWithStart(t *testing.T) {
@@ -129,18 +98,10 @@ func TestMapReduceWithStart(t *testing.T) {
 	).ToSlice()
 
 	// assert
-	if len(got) != 3 {
-		t.Errorf("len(mappedSlice) = %d; want 3", len(got))
-	}
-	if got[0] != 2 {
-		t.Errorf("mappedSlice[0] = %d; want 1", got[0])
-	}
-	if got[1] != 4 {
-		t.Errorf("mappedSlice[0] = %d; want 3", got[1])
-	}
-	if got[2] != 7 {
-		t.Errorf("mappedSlice[0] = %d; want 6", got[2])
-	}
+	assert.Equal(t, 3, len(got), "wrong length")
+	assert.Equal(t, 2, got[0], "wrong value")
+	assert.Equal(t, 4, got[1], "wrong value")
+	assert.Equal(t, 7, got[2], "wrong value")
 }
 
 func TestFlatMap(t *testing.T) {
@@ -151,18 +112,10 @@ func TestFlatMap(t *testing.T) {
 	).ToSlice()
 
 	// assert
-	if len(got) != 3 {
-		t.Errorf("len(FlatMap) = %d; want 7", len(got))
-	}
-	if got[0] != "1" {
-		t.Errorf("mappedSlice[0] = %v; want 1", got[0])
-	}
-	if got[1] != "2" {
-		t.Errorf("mappedSlice[0] = %v; want 3", got[1])
-	}
-	if got[2] != "4" {
-		t.Errorf("mappedSlice[0] = %v; want 6", got[2])
-	}
+	assert.Equal(t, 3, len(got), "wrong length")
+	assert.Equal(t, "1", got[0], "wrong value")
+	assert.Equal(t, "2", got[1], "wrong value")
+	assert.Equal(t, "4", got[2], "wrong value")
 }
 
 func TestGroupBy(t *testing.T) {
@@ -178,28 +131,12 @@ func TestGroupBy(t *testing.T) {
 	byName := GroupBy(stream, func(it Person) string { return it.name })
 
 	// assert
-	if len(byAge) != 3 {
-		t.Errorf("len(byAge) = %v; want 3", len(byAge))
-	}
-	if len(byName) != 3 {
-		t.Errorf("len(byAge) = %v; want 3", len(byName))
-	}
-	if byAge[30][0].age != 30 {
-		t.Errorf("byAge[30][0].age = %v; want 3", byAge[30][0].age)
-	}
-	if byAge[30][0].name != "Tim" {
-		t.Errorf("byAge[30][0].name = %v; want 3", byAge[30][0].name)
-	}
-	if byAge[30][1].age != 30 {
-		t.Errorf("byAge[30][1].age = %v; want 3", byAge[30][1].age)
-	}
-	if byAge[30][1].name != "John" {
-		t.Errorf("len(byAge) = %v; want 3", byAge[30][1].name)
-	}
-	if byName["Bil"][0].age != 40 {
-		t.Errorf("byName[\"Bil\"][0].age = %v; want 3", byName["Bil"][0].age)
-	}
-	if byName["Bil"][0].name != "Bil" {
-		t.Errorf("byName[\"Bill\"][0].name = %v; want 3", byName["Bill"][0].name)
-	}
+	assert.Equal(t, 3, len(byAge), "wrong length")
+	assert.Equal(t, 3, len(byName), "wrong length")
+	assert.Equal(t, 30, byAge[30][0].age, "wrong value")
+	assert.Equal(t, "Tim", byAge[30][0].name, "wrong value")
+	assert.Equal(t, 30, byAge[30][1].age, "wrong value")
+	assert.Equal(t, "John", byAge[30][1].name, "wrong value")
+	assert.Equal(t, 40, byName["Bil"][0].age, "wrong value")
+	assert.Equal(t, "Bil", byName["Bil"][0].name, "wrong value")
 }

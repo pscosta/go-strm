@@ -1,6 +1,7 @@
 package strm
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -14,18 +15,10 @@ func TestMapSum(t *testing.T) {
 	).ToSlice()
 
 	// assert
-	if len(got) != 3 {
-		t.Errorf("len(mappedStream) = %d; want 3", len(got))
-	}
-	if got[0] != 1 {
-		t.Errorf("mappedStream[0] = %d; want 1", got[0])
-	}
-	if got[1] != 3 {
-		t.Errorf("mappedStream[0] = %d; want 3", got[0])
-	}
-	if got[2] != 6 {
-		t.Errorf("mappedStream[0] = %d; want 6", got[0])
-	}
+	assert.Equal(t, len(initSlice), len(got), "wrong length")
+	assert.Equal(t, 1, got[0], "wrong sum")
+	assert.Equal(t, 3, got[1], "wrong sum")
+	assert.Equal(t, 6, got[2], "wrong sum")
 }
 
 func TestMapMin(t *testing.T) {
@@ -38,18 +31,10 @@ func TestMapMin(t *testing.T) {
 	).ToSlice()
 
 	// assert
-	if len(got) != 3 {
-		t.Errorf("len(mappedStream) = %d; want 3", len(got))
-	}
-	if got[0] != 1 {
-		t.Errorf("mappedStream[0] = %d; want 1", got[0])
-	}
-	if got[1] != 1 {
-		t.Errorf("mappedStream[0] = %d; want 3", got[0])
-	}
-	if got[2] != 1 {
-		t.Errorf("mappedStream[0] = %d; want 6", got[0])
-	}
+	assert.Equal(t, len(initSlice), len(got), "wrong length")
+	assert.Equal(t, 1, got[0], "wrong min")
+	assert.Equal(t, 1, got[1], "wrong min")
+	assert.Equal(t, 1, got[2], "wrong min")
 }
 
 func TestMapMax(t *testing.T) {
@@ -62,18 +47,10 @@ func TestMapMax(t *testing.T) {
 	).ToSlice()
 
 	// assert
-	if len(got) != 3 {
-		t.Errorf("len(got) = %d; want 3", len(got))
-	}
-	if got[0] != 1 {
-		t.Errorf("got[0] = %d; want 1", got[0])
-	}
-	if got[1] != 2 {
-		t.Errorf("got[0] = %d; want 3", got[0])
-	}
-	if got[2] != 3 {
-		t.Errorf("got[0] = %d; want 6", got[0])
-	}
+	assert.Equal(t, len(initSlice), len(got), "wrong length")
+	assert.Equal(t, 1, got[0], "wrong max")
+	assert.Equal(t, 2, got[1], "wrong max")
+	assert.Equal(t, 3, got[2], "wrong max")
 }
 
 func TestOnEach(t *testing.T) {
@@ -87,19 +64,9 @@ func TestOnEach(t *testing.T) {
 		ToSlice()
 
 	// assert
-	if len(resCollector) != 3 {
-		t.Errorf("len(got) = %d; want 3", len(got))
-	}
-	for _, elem := range resCollector {
-		if elem != 2 {
-			t.Errorf("%d; want 2", elem)
-		}
-	}
-	for _, elem := range got {
-		if elem != 1 {
-			t.Errorf("%d; want 1", elem)
-		}
-	}
+	assert.Equal(t, len(initSlice), len(resCollector), "wrong length")
+	From(resCollector).ForEach(func(elem int) { assert.Equal(t, 2, elem, "wrong value") })
+	From(got).ForEach(func(elem int) { assert.Equal(t, 1, elem, "wrong value") })
 }
 
 func TestApplyOnEach(t *testing.T) {
@@ -112,139 +79,114 @@ func TestApplyOnEach(t *testing.T) {
 		ToSlice()
 
 	// assert
-	if len(got) != 3 {
-		t.Errorf("len(got) = %d; want 3", len(got))
-	}
-	for _, elem := range got {
-		if elem != 2 {
-			t.Errorf("%d; want 2", elem)
-		}
-	}
+	assert.Equal(t, len(initSlice), len(got), "wrong length")
+	From(got).ForEach(func(elem int) { assert.Equal(t, 2, elem, "wrong value") })
 }
 
 func TestReversed(t *testing.T) {
 	// call
-	slice1 := Of(1, 2, 3).Reversed().ToSlice()
+	reversedSlice := Of(1, 2, 3).Reversed().ToSlice()
 	filteredSlice := Of(1, 2, 3).
 		Filter(func(it int) bool { return it > 1 }).
 		Reversed().
 		ToSlice()
 
 	// assert
-	if len(slice1) != 3 {
-		t.Errorf("len(slice1) = %d; want 3", len(slice1))
-	}
-	if len(filteredSlice) != 2 {
-		t.Errorf("len(slice2) = %d; want 2", len(filteredSlice))
-	}
-	if (slice1[0] != 3) || (slice1[1] != 2) || (slice1[2] != 1) {
-		t.Errorf("slice1 = %v; want [3,2,1]", slice1)
-	}
-	if (filteredSlice[0] != 3) || (filteredSlice[1] != 2) {
-		t.Errorf("filteredSlice = %v; want [3,2]", filteredSlice)
-	}
+	assert.Equal(t, 3, len(reversedSlice), "wrong length")
+	assert.Equal(t, 2, len(filteredSlice), "wrong length")
+	assert.Equal(t, 3, reversedSlice[0], "wrong value")
+	assert.Equal(t, 2, reversedSlice[1], "wrong value")
+	assert.Equal(t, 1, reversedSlice[2], "wrong value")
+	assert.Equal(t, 3, filteredSlice[0], "wrong value")
+	assert.Equal(t, 2, filteredSlice[1], "wrong value")
 }
 
 func TestDistinct(t *testing.T) {
 	// call
-	slice1 := Of(1, 2, 3, 3).Distinct().ToSlice()
+	dedupedSlice := Of(1, 2, 3, 3).Distinct().ToSlice()
 	filteredSlice := Of(1, 2, 3, 3).
 		Filter(func(it int) bool { return it > 1 }).
 		Distinct().
 		ToSlice()
 
 	// assert
-	if len(slice1) != 3 {
-		t.Errorf("len(slice1) = %d; want 3", len(slice1))
+	assert.Equal(t, 3, len(dedupedSlice), "wrong length")
+	assert.Equal(t, 2, len(filteredSlice), "wrong length")
+	assert.Equal(t, 1, dedupedSlice[0], "wrong value")
+	assert.Equal(t, 2, dedupedSlice[1], "wrong value")
+	assert.Equal(t, 3, dedupedSlice[2], "wrong value")
+	assert.Equal(t, 2, filteredSlice[0], "wrong value")
+	assert.Equal(t, 3, filteredSlice[1], "wrong value")
+}
+
+func TestDistinctStruct(t *testing.T) {
+	// prepare
+	type Person struct {
+		name string
 	}
-	if len(filteredSlice) != 2 {
-		t.Errorf("len(slice2) = %d; want 2", len(filteredSlice))
-	}
-	if (slice1[2] != 3) || (slice1[1] != 2) || (slice1[0] != 1) {
-		t.Errorf("slice1 = %v; want [1,2,3]", slice1)
-	}
-	if (filteredSlice[1] != 3) || (filteredSlice[0] != 2) {
-		t.Errorf("filteredSlice = %v; want [2,3]", filteredSlice)
-	}
+	// call
+	dedupedSlice := Of(Person{"Tim"}, Person{"Tim"}, Person{"Tom"}).Distinct().ToSlice()
+
+	// assert
+	assert.Equal(t, 2, len(dedupedSlice), "wrong length")
+	assert.Equal(t, Person{"Tim"}, dedupedSlice[0], "wrong value")
+	assert.Equal(t, Person{"Tom"}, dedupedSlice[1], "wrong value")
+}
+
+func TestDistinctSlice(t *testing.T) {
+	// call
+	dedupedSlice := Of([]int{1}, []int{1}, []int{1, 2}).Distinct().ToSlice()
+
+	// assert
+	assert.Equal(t, 3, len(dedupedSlice), "wrong length")
+	assert.Equal(t, []int{1}, dedupedSlice[0], "wrong value")
 }
 
 func TestChunked(t *testing.T) {
 	// call
-	slice1 := Of(1, 2, 3, 4, 5, 6).Chunked(2)
+	batches := Of(1, 2, 3, 4, 5, 6).Chunked(2)
 
 	// assert
-	if len(slice1) != 3 {
-		t.Errorf("Chunked(2) = %d; want 3", len(slice1))
-	}
-	for _, slice := range slice1 {
-		if len(slice) != 2 {
-			t.Errorf("Chunked(2) = %d; want 2", len(slice))
-		}
-	}
+	assert.Equal(t, 3, len(batches), "wrong length")
+	From(batches).ForEach(func(b []int) { assert.Equal(t, 2, len(b), "wrong batch length") })
 }
 
 func TestChunkedOdd(t *testing.T) {
 	// call
-	slice1 := Of(1, 2, 3, 4, 5, 6, 7).Chunked(2)
+	batches := Of(1, 2, 3, 4, 5, 6, 7).Chunked(2)
 
 	// assert
-	if len(slice1) != 4 {
-		t.Errorf("Chunked(2) = %d; want 3", len(slice1))
-	}
-	if len(slice1[3]) != 1 {
-		t.Errorf("Chunked(2) = %d; want 4", len(slice1[3]))
-	}
-	for i := 0; i < len(slice1)-1; i++ {
-		if len(slice1[i]) != 2 {
-			t.Errorf("Chunked(2) = %d; want 2", len(slice1[i]))
-		}
-	}
+	assert.Equal(t, 4, len(batches), "wrong length")
+	assert.Equal(t, 1, len(batches[3]), "wrong last batch length")
+	From(batches).Take(3).ForEach(func(b []int) { assert.Equal(t, 2, len(b), "wrong batch length") })
 }
 
 func TestWindowed(t *testing.T) {
 	// call
-	slice1 := Of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15).Windowed(5, 3)
+	windows := Of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15).Windowed(5, 3)
 
 	// assert
-	if len(slice1) != 4 {
-		t.Errorf("Windowed(5, 3) = %d; want 3", len(slice1))
-	}
-	for i := 0; i < len(slice1); i++ {
-		if len(slice1[i]) != 5 {
-			t.Errorf("Windowed(5, 3) = %d; want 5", len(slice1[i]))
-		}
-	}
+	assert.Equal(t, 4, len(windows), "wrong length")
+	From(windows).ForEach(func(w []int) { assert.Equal(t, 5, len(w), "wrong window length") })
 }
 
 func TestWindowedPartial(t *testing.T) {
 	// call
-	slice1 := Of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15).Windowed(5, 3, true)
+	windows := Of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15).Windowed(5, 3, true)
 
 	// assert
-	if len(slice1) != 5 {
-		t.Errorf("Windowed(5, 3) = %d; want 3", len(slice1))
-	}
-	if len(slice1[4]) != 3 {
-		t.Errorf("Windowed(5, 3) = %d; want 3", len(slice1[4]))
-	}
-	for i := 0; i < len(slice1)-1; i++ {
-		if len(slice1[i]) != 5 {
-			t.Errorf("Windowed(5, 3) = %d; want 5", len(slice1[i]))
-		}
-	}
+	assert.Equal(t, 5, len(windows), "wrong length")
+	assert.Equal(t, 3, len(windows[4]), "wrong last window length")
+	From(windows).Take(4).ForEach(func(w []int) { assert.Equal(t, 5, len(w), "wrong window length") })
 }
 
 func TestWindowedBigWindow(t *testing.T) {
 	// call
-	slice1 := Of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15).Windowed(16, 3)
+	windows := Of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15).Windowed(16, 3)
 
 	// assert
-	if len(slice1) != 1 {
-		t.Errorf("Windowed(16, 3) = %d; want 1", len(slice1))
-	}
-	if len(slice1[0]) != 15 {
-		t.Errorf("Windowed(16, 3) = %d; want 15", len(slice1[0]))
-	}
+	assert.Equal(t, 1, len(windows), "wrong length")
+	assert.Equal(t, 15, len(windows[0]), "wrong length")
 }
 
 func TestTake(t *testing.T) {
@@ -254,12 +196,9 @@ func TestTake(t *testing.T) {
 		ToSlice()
 
 	// assert
-	if len(got) != 2 {
-		t.Errorf("len(take(2)) = %d; want 2", len(got))
-	}
-	if got[0] != 0 || got[1] != 1 {
-		t.Errorf("take = %v", got)
-	}
+	assert.Equal(t, 2, len(got), "wrong length")
+	assert.Equal(t, 0, got[0], "wrong value")
+	assert.Equal(t, 1, got[1], "wrong value")
 }
 
 func TestTakeNothing(t *testing.T) {
@@ -269,9 +208,7 @@ func TestTakeNothing(t *testing.T) {
 		ToSlice()
 
 	// assert
-	if len(got) != 0 {
-		t.Errorf("len(take(0)) = %d; want 0", len(got))
-	}
+	assert.Equal(t, 0, len(got), "wrong length")
 }
 
 func TestTakeAll(t *testing.T) {
@@ -293,12 +230,9 @@ func TestDrop(t *testing.T) {
 		ToSlice()
 
 	// assert
-	if len(got) != 2 {
-		t.Errorf("len(drop(2)) = %d; want 2", len(got))
-	}
-	if got[0] != 2 || got[1] != 3 {
-		t.Errorf("drop = %v", got)
-	}
+	assert.Equal(t, 2, len(got), "wrong length")
+	assert.Equal(t, 2, got[0], "wrong value")
+	assert.Equal(t, 3, got[1], "wrong value")
 }
 
 func TestEmptyDrop(t *testing.T) {
@@ -308,9 +242,7 @@ func TestEmptyDrop(t *testing.T) {
 		ToSlice()
 
 	// assert
-	if len(got) != 0 {
-		t.Errorf("len(drop(2)) = %d; want 0", len(got))
-	}
+	assert.Equal(t, 0, len(got), "wrong length")
 }
 
 func TestDropNothing(t *testing.T) {
@@ -320,7 +252,5 @@ func TestDropNothing(t *testing.T) {
 		ToSlice()
 
 	// assert
-	if len(got) != 4 {
-		t.Errorf("len(drop(0)) = %d; want 4", len(got))
-	}
+	assert.Equal(t, 4, len(got), "wrong length")
 }
