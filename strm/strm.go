@@ -14,7 +14,7 @@ type reducer[OUT any, IN any] func(OUT, IN) OUT
 type Stream[T any] struct {
 	slice      []T
 	filters    []predicate[T]
-	streamKind reflect.Kind
+	comparable bool
 }
 
 // Constructors
@@ -24,7 +24,7 @@ type Stream[T any] struct {
 func From[T any](backingSlice []T) *Stream[T] {
 	return &Stream[T]{
 		slice:      backingSlice,
-		streamKind: typeOf[T](),
+		comparable: isComparableType[T](),
 	}
 }
 
@@ -36,7 +36,7 @@ func CopyFrom[T any](slice []T) *Stream[T] {
 
 	return &Stream[T]{
 		slice:      sliceCopy,
-		streamKind: reflect.TypeOf((*T)(nil)).Elem().Kind(),
+		comparable: isComparableType[T](),
 	}
 }
 
@@ -122,9 +122,9 @@ func GroupBy[K comparable, V any](s *Stream[V], keySelector func(V) K) map[K][]V
 
 // Internal Ops
 
-// returns the King of the given generic type
-func typeOf[T any]() reflect.Kind {
-	return reflect.TypeOf((*T)(nil)).Elem().Kind()
+// returns true if the given generic type is Comparable
+func isComparableType[T any]() bool {
+	return reflect.TypeOf((*T)(nil)).Elem().Comparable()
 }
 
 // returns the filtered backing slice after applying all registered filters

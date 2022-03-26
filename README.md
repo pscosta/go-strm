@@ -184,6 +184,8 @@ byName := strm.GroupBy(people, func(it Person) string { return it.name })
 ````
 
 #### De-duping and Reversing
+`Distinct` de-dupes strms of `Comparable` types, like structs, pointers and primitive types, 
+otherwise, the strm remains unchanged.
 
 ```go
 // deduped -> [2 3 4 5 6]
@@ -193,6 +195,11 @@ deduped := strm.Of(2, 2, 3, 4, 4, 5, 6, 6).
 
 // dedupedStruct -> [{Peter 18} {Bruce 48}]
 dedupedStruct := strm.Of(Person{"Peter", 18}, Person{"Peter", 18}, Person{"Bruce", 48}).
+    Distinct().
+    ToSlice()
+
+// dedupedSlices -> [[1 2] [1 2] [3 4]]
+dedupedSlices := strm.Of([]int{1, 2}, []int{1, 2}, []int{3, 4}).
     Distinct().
     ToSlice()
 
@@ -236,6 +243,10 @@ countBy := strm.Of(1, 2, 3, 4, 5).
 // contains -> true 
 contains := strm.Of(Person{"Peter", 18}, Person{"John", 30}, Person{"Bruce", 48}).
 	Contains(Person{"Bruce", 48})
+
+// contains -> false
+contains := strm.Of([]int{1, 2}, []int{3, 4}).
+	Contains([]int{1, 2})
 
 // names -> Peter,John,Sarah,Kate
 people := strm.From([]Person{{"Peter", 30}, {"John", 18}, {"Sarah", 16}, {"Kate", 16}})

@@ -2,7 +2,6 @@ package strm
 
 import (
 	"golang.org/x/exp/constraints"
-	"reflect"
 )
 
 // OnEach executes the given [action] on each element and returns the unchanged Stream afterwards.
@@ -93,19 +92,13 @@ func (s *Stream[T]) Reversed() *Stream[T] {
 }
 
 // Distinct In-place deduplication of the backing slice, guided with a map.
-// Streams of structs, pointers and primitive types are correctly de-duped
+// Streams of Comparable structs, pointers and primitive types are correctly de-duped;
+// otherwise returns the unchanged [stream].
 func (s *Stream[T]) Distinct() *Stream[T] {
-	var keySelector func(t T) any
-
-	// decides whether to compare pointers or values
-	switch s.streamKind {
-	case reflect.Array, reflect.Slice, reflect.Func, reflect.Map:
-		// this is a hack to allow for key hashing over unhashable types
-		keySelector = func(t T) any { return &t }
-	default:
-		keySelector = func(t T) any { return t }
+	if !s.comparable {
+		return s
 	}
-
+	keySelector := func(t T) any { return t }
 	keys := make(map[any]struct{}, len(s.filteredSlice()))
 	j := 0
 
