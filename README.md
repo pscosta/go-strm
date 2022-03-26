@@ -108,9 +108,8 @@ people := []Person{{"Peter", 30}, {"John", 18}, {"Sarah", 16}, {"Kate", 16}}
 
 // maps a strm of (Person) to a slice of Person.name (string)  
 // names -> [Peter John Sarah Kate]
-names := strm.
-    Map(strm.From(people), func(p Person) string { return p.name }).
-    ToSlice()
+names := Map(From(people), func(p Person) string { return p.name }).
+        ToSlice()
 ```
 
 #### Mapping & Reducing
@@ -145,7 +144,7 @@ maxs := Map(
 // flatSlice -> [1 1 2 1 2 3]
 flatSlice := FlatMap(
     From(slices),
-    func(it []int) *strm.Stream[int] { return From(it) },
+    func(it []int) *Stream[int] { return From(it) },
 ).ToSlice()
 ```
 
@@ -249,8 +248,8 @@ contains := strm.Of([]int{1, 2}, []int{3, 4}).
 	Contains([]int{1, 2})
 
 // names -> Peter,John,Sarah,Kate
-people := strm.From([]Person{{"Peter", 30}, {"John", 18}, {"Sarah", 16}, {"Kate", 16}})
-names := strm.Map(people, func(p Person) string { return p.name }).
+people := From([]Person{{"Peter", 30}, {"John", 18}, {"Sarah", 16}, {"Kate", 16}})
+names := Map(people, func(p Person) string { return p.name }).
 	JoinToString(",")
 ```
 

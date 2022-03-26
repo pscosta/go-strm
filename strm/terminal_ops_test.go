@@ -1,6 +1,7 @@
 package strm
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -9,14 +10,11 @@ func TestToSlice(t *testing.T) {
 	initSlice := []int{1, 2, 3}
 	// call
 	resSlice := From(initSlice).ToSlice()
+
 	// assert
-	if got := resSlice; len(got) != 3 {
-		t.Errorf("len(stream) = %d; want 3", len(got))
-	}
+	assert.Equal(t, len(initSlice), len(resSlice), "should have same length")
 	for i := range resSlice {
-		if got := resSlice[i]; initSlice[i] != resSlice[i] {
-			t.Errorf("initSlice[i] != resSlice[i] = %d", got)
-		}
+		assert.Equal(t, initSlice[i], resSlice[i], "should be equal")
 	}
 }
 
@@ -29,13 +27,10 @@ func TestForEach(t *testing.T) {
 	From(initSlice).ForEach(func(it int) { resCollector = append(resCollector, it+1) })
 
 	// assert
-	if len(resCollector) != 3 {
-		t.Errorf("len(got) = %d; want 3", len(initSlice))
-	}
+	assert.Equal(t, 3, len(resCollector), "should have initial length")
+	assert.Equal(t, len(initSlice), len(resCollector), "should have same length")
 	for _, elem := range resCollector {
-		if elem != 2 {
-			t.Errorf("%d; want 2", elem)
-		}
+		assert.Equal(t, 2, elem, "should have been incremented in one unit")
 	}
 }
 
@@ -46,16 +41,11 @@ func TestAny(t *testing.T) {
 	gotLen := From(initSlice).Any(func(it string) bool { return len(it) > 3 })
 	gotMatch := From(initSlice).Any(func(it string) bool { return it == "Hey" })
 	gotBye := From(initSlice).Any(func(it string) bool { return it == "Bye" })
+
 	// assert
-	if !gotLen {
-		t.Errorf("Any (len): %v want true", gotLen)
-	}
-	if !gotMatch {
-		t.Errorf("Any (match): %v want true", gotLen)
-	}
-	if gotBye {
-		t.Errorf("Any (match): %v want false", gotLen)
-	}
+	assert.True(t, gotLen, "Any(len): expecting true")
+	assert.True(t, gotMatch, "Any(Hey): expecting true")
+	assert.False(t, gotBye, "Any(Bye): expecting false")
 }
 
 func TestAll(t *testing.T) {
@@ -69,37 +59,25 @@ func TestAll(t *testing.T) {
 		All(func(it string) bool { return it == "Hello!" })
 
 	// assert
-	if !gotLen {
-		t.Errorf("All (len): %v want true", gotLen)
-	}
-	if !gotLenFiltered {
-		t.Errorf("All (len filtered): %v want true", gotLen)
-	}
-	if gotMatch {
-		t.Errorf("All (match): %v want false", gotMatch)
-	}
+	assert.True(t, gotLen, "All: expecting true")
+	assert.True(t, gotLenFiltered, "Any: expecting true")
+	assert.False(t, gotMatch, "All: expecting false")
 }
 
 func TestNone(t *testing.T) {
 	// prepare
 	initSlice := []string{"Hi!", "Hello!", "Hey", ""}
 	// call
-	gotMatch := From(initSlice).None(func(it string) bool { return it == "Hey" })
-	gotLen := From(initSlice).None(func(it string) bool { return len(it) < 3 })
-	gotLenFiltered := Of("Hi!", "Hello!", "Hey", "").
+	noneMatch := From(initSlice).None(func(it string) bool { return it == "Hey" })
+	noneLen := From(initSlice).None(func(it string) bool { return len(it) < 3 })
+	noneLenFiltered := Of("Hi!", "Hello!", "Hey", "").
 		Filter(func(it string) bool { return len(it) > 0 }).
 		None(func(it string) bool { return len(it) < 3 })
 
 	// assert
-	if !gotLenFiltered {
-		t.Errorf("None (len Filtered): %v want false", gotLen)
-	}
-	if gotLen {
-		t.Errorf("None (len): %v want false", gotLen)
-	}
-	if gotMatch {
-		t.Errorf("None (match): %v want false", gotMatch)
-	}
+	assert.True(t, noneLenFiltered, "None: expecting true")
+	assert.False(t, noneLen, "None: expecting true")
+	assert.False(t, noneMatch, "None: expecting false")
 }
 
 func TestCount(t *testing.T) {
@@ -109,12 +87,8 @@ func TestCount(t *testing.T) {
 	count1 := Of(1, 2, 3).Filter(func(it int) bool { return it > 1 }).Count()
 	count2 := From(slice2).Count()
 	// assert
-	if count1 != 2 {
-		t.Errorf("count1 = %d; want 2", count1)
-	}
-	if count2 != 0 {
-		t.Errorf("count2 = %d; want 0", count2)
-	}
+	assert.Equal(t, 2, count1, "wrong count")
+	assert.Equal(t, 0, count2, "wrong count")
 }
 
 func TestCountBy(t *testing.T) {
@@ -127,12 +101,8 @@ func TestCountBy(t *testing.T) {
 		CountBy(func(it int) bool { return it > 2 })
 
 	// assert
-	if count1 != 1 {
-		t.Errorf("count1 = %d; want 1", count1)
-	}
-	if count2 != 0 {
-		t.Errorf("count2 = %d; want 0", count2)
-	}
+	assert.Equal(t, 1, count1, "wrong count")
+	assert.Equal(t, 0, count2, "wrong count")
 }
 
 func TestSumBy(t *testing.T) {
@@ -150,12 +120,8 @@ func TestSumBy(t *testing.T) {
 		})
 
 	// assert
-	if sumBy != 6 {
-		t.Errorf("sumBy = %d; want 4", sumBy)
-	}
-	if sum1 != 0 {
-		t.Errorf("sum1 = %d; want 0", sum1)
-	}
+	assert.Equal(t, 6, sumBy, "wrong sum")
+	assert.Equal(t, 0, sum1, "wrong sum")
 }
 
 func TestFirst(t *testing.T) {
@@ -168,66 +134,50 @@ func TestFirst(t *testing.T) {
 		First()
 
 	// assert
-	if first1 != 0 {
-		t.Errorf("first1 = %d; want 0", first1)
-	}
-	if first2 != 2 {
-		t.Errorf("first2 = %d; want 2", first2)
-	}
+	assert.Equal(t, 0, first1, "wrong first elem")
+	assert.Equal(t, 2, first2, "wrong first elem")
 }
 
 func TestFirstBy(t *testing.T) {
 	// prepare
-	var slice2 []int
+	var slice []int
 	// call
-	first1 := From(slice2).FirstBy(func(it int) bool { return it > 1 })
+	first1 := From(slice).FirstBy(func(it int) bool { return it > 1 })
 	first2 := Of(1, 2, 3).
 		Filter(func(it int) bool { return it > 1 }).
 		FirstBy(func(it int) bool { return it > 2 })
 
 	// assert
-	if first1 != 0 {
-		t.Errorf("first1 = %d; want 0", first1)
-	}
-	if first2 != 3 {
-		t.Errorf("first2 = %d; want 3", first2)
-	}
+	assert.Equal(t, 0, first1, "wrong first elem")
+	assert.Equal(t, 3, first2, "wrong first elem")
 }
 
 func TestLast(t *testing.T) {
 	// prepare
-	var slice2 []int
+	var slice []int
 	// call
-	last1 := From(slice2).Last()
+	last1 := From(slice).Last()
 	last2 := Of(1, 2, 3).
 		Filter(func(it int) bool { return it > 1 }).
 		Last()
 
 	// assert
-	if last1 != 0 {
-		t.Errorf("last1 = %d; want 0", last1)
-	}
-	if last2 != 3 {
-		t.Errorf("last2 = %d; want 2", last2)
-	}
+	assert.Equal(t, 0, last1, "wrong last elem")
+	assert.Equal(t, 3, last2, "wrong last elem")
 }
 
 func TestJoinToString(t *testing.T) {
 	// prepare
-	var slice2 []int
+	var slice []int
 	// call
-	str1 := From(slice2).JoinToString(",")
+	str1 := From(slice).JoinToString(",")
 	str2 := Of(1, 2, 3).
 		Filter(func(it int) bool { return it > 1 }).
 		JoinToString("-")
 
 	// assert
-	if str1 != "" {
-		t.Errorf("str1 = %v; want empty", str1)
-	}
-	if str2 != "2-3" {
-		t.Errorf("str2 = %v; want \"2-3\"", str2)
-	}
+	assert.Equal(t, "", str1, "wrong string")
+	assert.Equal(t, "2-3", str2, "wrong string")
 }
 
 func TestContains(t *testing.T) {
@@ -236,27 +186,28 @@ func TestContains(t *testing.T) {
 		name string
 		age  int
 	}
+	type DifficultPerson struct {
+		age    int
+		issues []string
+	}
+
 	// call
-	containInt := Of(1, 2, 3).Contains(2)
-	containsInt2 := Of(1, 2, 3).Contains(4)
-	containsStruct := Of(Person{"Tim", 30}, Person{"Tom", 40}).Contains(Person{"Tom", 40})
-	containsString := Of("Tim", "Tom").Contains("tom")
-	containsSlice := From([][]int{{1}, {1, 2}, {1, 2, 3}}).Contains([]int{1})
+	hasInt := Of(1, 2, 3).Contains(2)
+	hasInt2 := Of(1, 2, 3).Contains(4)
+	hasStruct := Of(Person{"Tim", 30}, Person{"Tom", 40}).Contains(Person{"Tom", 40})
+	hasString := Of("Tim", "Tom").Contains("tom")
+	hasSlice := From([][]int{{1}, {1, 2}, {1, 2, 3}}).Contains([]int{1})
+	hasSlices := Of(DifficultPerson{39, []string{"covid"}}).Contains(DifficultPerson{39, []string{"covid"}})
+	hasFuns := Of(func(i int) {}).Contains(func(i int) {})
+	hasMaps := Of(map[int]int{1: 1}).Contains(map[int]int{1: 1})
 
 	// assert
-	if !containInt {
-		t.Errorf("containInt(2) = %v; want true", containInt)
-	}
-	if containsInt2 {
-		t.Errorf("containInt(4) = %v; want false", containsInt2)
-	}
-	if !containsStruct {
-		t.Errorf("containInt(Person{\"Tom\", 40}) = %v; want true", containsStruct)
-	}
-	if containsString {
-		t.Errorf("containInt(\"tom\") = %v; want false", containsString)
-	}
-	if containsSlice {
-		t.Errorf("containInt(\"[]int{1}\") = %v; want false", containsSlice)
-	}
+	assert.True(t, hasInt, "wrong Contains value")
+	assert.False(t, hasInt2, "wrong Contains value")
+	assert.True(t, hasStruct, "wrong Contains value")
+	assert.False(t, hasString, "wrong Contains value")
+	assert.False(t, hasSlice, "wrong Contains value")
+	assert.False(t, hasSlices, "wrong Contains value")
+	assert.False(t, hasFuns, "wrong Contains value")
+	assert.False(t, hasMaps, "wrong Contains value")
 }
