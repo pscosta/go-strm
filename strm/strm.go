@@ -17,7 +17,9 @@ type Stream[T any] struct {
 	comparable bool
 }
 
-// Constructors
+/*
+ * Constructors
+ */
 
 // From Creates a new Stream backed by the given [backingSlice]
 // the state of the given backingSlice will be updated by operation applied to the returned Stream
@@ -50,7 +52,9 @@ func Of[T any](elems ...T) *Stream[T] {
 	return From(slice)
 }
 
-// Main functions
+/*
+ * Main Ops
+ */
 
 // Filter Returns a Stream containing only elements matching the given [predicate].
 // This operation is lazy and will be applied only upon calling a terminal operation on the Stream
@@ -120,7 +124,9 @@ func GroupBy[K comparable, V any](s *Stream[V], keySelector func(V) K) map[K][]V
 	return grouping
 }
 
-// Internal Ops
+/*
+ * Internal Ops
+ */
 
 // returns true if the given generic type is Comparable
 func isComparableType[T any]() bool {
