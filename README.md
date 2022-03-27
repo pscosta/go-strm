@@ -298,6 +298,23 @@ drop := strm.Of(0, 1, 2, 3).
 	ToSlice()
 ````
 
+### API Benchmarking 
+
+Performance-wise, standard mapping and filtering perform very well. Chained operations like applying several mappings 
+and filters over the strm, can be slower than just performing native for loops. 
+
+```
+goos: darwin
+goarch: amd64
+pkg: streams/strm/strm
+cpu: Intel(R) Core(TM) i9-8950HK CPU @ 2.90GHz
+Filter-12           114ns ± 2%     98ns ± 5%   -13.81%  (p=0.008 n=5+5)
+ChainedFilters-12   117ns ± 4%    138ns ± 5%   +17.97%  (p=0.008 n=5+5)
+Distinct-12         526ns ± 3%    461ns ± 5%   -12.48%  (p=0.008 n=5+5)
+Map-12             1.36µs ± 3%   1.55µs ± 3%   +13.35%  (p=0.008 n=5+5)
+MapFilter-12       1.29µs ± 5%   1.65µs ± 3%   +27.77%  (p=0.008 n=5+5)
+```
+
 ### API Operations Listing 
 
 ```go
