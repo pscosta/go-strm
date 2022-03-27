@@ -300,7 +300,7 @@ drop := strm.Of(0, 1, 2, 3).
 
 ### API Benchmarking 
 
-Performance-wise, standard mapping and filtering perform very well. Chained operations like applying several mappings 
+Performance-wise, single mapping and filtering ops perform very well. Chained operations like applying several mappings 
 and filters over the strm, can be slower than just performing native for loops. 
 
 ```
