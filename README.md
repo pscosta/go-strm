@@ -407,4 +407,5 @@ func Sum() int
 func Min() int
 func Max() int
 func Avg() int
+func ToStrm() *Stream[int]
 ```
