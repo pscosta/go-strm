@@ -298,6 +298,40 @@ drop := strm.Of(0, 1, 2, 3).
 	ToSlice()
 ````
 
+#### Int Ranges 
+
+An int range, represented by the `IntStream` type, is also available for convenience of use `Sum`, `Min`, `Max`, `Avg` and `Sorted` ops.
+This type encloses a `*Stream[int]` exclusively, leveraging all methods already available in the Stream type. 
+
+```go
+// sum -> 15
+sum := strm.Range(1,5).
+	Sum()
+
+// min -> 1
+min := strm.RangeOf(1, 2, 3, 4, 5).
+	Min()
+
+// max -> 5
+max := strm.RangeFrom([]int{1, 2, 3, 4, 5}).
+	Max()
+
+// avg -> 2
+avg := strm.Range(1,4).
+	Avg()
+
+// sorted -> [1 2 3 4 5]
+sorted := strm.RangeOf(5, 4, 2, 1, 3).
+	Sorted().
+	ToSlice()
+
+// mappedSlice -> [2 3 4 5 6]
+mappedSlice := Map(
+    RangeOf(5, 4, 2, 1, 3).Sorted().ToStrm(),
+    func(it int) int { return it+1 },
+).ToSlice()
+```
+
 ### API Benchmarking 
 
 Performance-wise, single mapping and filtering ops perform very well. Chained operations like applying several mappings 
@@ -362,4 +396,15 @@ func Contains(element T) bool
 func JoinToString(delimiter string) string
 func Chunked(batchSize int) [][]T
 func Windowed(size int, step int, partialWindows ...bool) [][]T
+
+// Int Ranges operations
+func Range(from int, to int) *IntStream
+func RangeOf(elems ...int) *IntStream
+func RangeFrom(backingIntSlice []int) *IntStream
+func RangeCopyFrom(backingIntSlice []int) *IntStream
+func Sorted() *IntStream
+func Sum() int
+func Min() int
+func Max() int
+func Avg() int
 ```
