@@ -3,6 +3,7 @@ package strm
 import (
 	"reflect"
 	"runtime"
+	"sync"
 )
 
 // internal types
@@ -74,14 +75,13 @@ func Map[IN any, OUT any](s *Stream[IN], f mapper[IN, OUT]) *Stream[OUT] {
 }
 
 // PMap Returns a new Stream containing the results of applying the given function to each element in the given Stream
-// in parallel. By default, the parallel work is batched by number of available CPU cores.
-// If the [noBatching] flag is present, PMap will launch a new goroutine per each element present in the provided Stream
-// - not recommended for very large Streams due to potentially large memory footprint.
-func PMap[IN any, OUT any](s *Stream[IN], f mapper[IN, OUT], noBatching ...bool) *Stream[OUT] {
-	if len(noBatching) == 0 {
-		return parallelBatchingMap(s, f)
-	} else {
+// in parallel. By default, PMap will launch a new goroutine per each element present in the provided Stream
+// If the [batching] flag is present, the parallel work is batched by number of available CPU cores.
+func PMap[IN any, OUT any](s *Stream[IN], f mapper[IN, OUT], batching ...bool) *Stream[OUT] {
+	if len(batching) == 0 {
 		return parallelLinearMap(s, f)
+	} else {
+		return parallelBatchingMap(s, f)
 	}
 }
 
@@ -167,20 +167,19 @@ filtering:
 // in the given Stream in parallel. A new goroutine is launched per each element present in the provided Stream.
 func parallelLinearMap[IN any, OUT any](s *Stream[IN], f mapper[IN, OUT]) *Stream[OUT] {
 	resultSlice := make([]OUT, len(s.filteredSlice()))
-	ch := make(chan struct{}, len(s.slice))
+	var wg sync.WaitGroup
+	wg.Add(len(s.slice))
 
 	// launching the goroutines
 	for i := range s.slice {
 		// launch goroutine that executes the mapping asynchronously
-		go func(f mapper[IN, OUT], idx int, ch chan struct{}) {
+		go func(f mapper[IN, OUT], idx int) {
+			defer wg.Done() // signals completion
 			resultSlice[idx] = f(s.slice[idx])
-			ch <- struct{}{} // signals completion
-		}(f, i, ch)
+		}(f, i)
 	}
 	// blocking: waits for all goroutines to complete
-	for range s.slice {
-		<-ch
-	}
+	wg.Wait()
 	return From(resultSlice)
 }
 
@@ -189,22 +188,21 @@ func parallelLinearMap[IN any, OUT any](s *Stream[IN], f mapper[IN, OUT]) *Strea
 func parallelBatchingMap[IN any, OUT any](s *Stream[IN], f mapper[IN, OUT]) *Stream[OUT] {
 	resultSlice := make([]OUT, len(s.filteredSlice()))
 	cores := Min(Of(runtime.NumCPU(), len(s.slice)))
-	ch := make(chan struct{}, cores)
+	var wg sync.WaitGroup
+	wg.Add(cores)
 	batchSize := Max(Of(len(s.slice)/cores, 1))
 
 	// launching the goroutines
 	for i := range s.slice {
 		// launch goroutine that executes the batch mapping asynchronously
-		go func(f mapper[IN, OUT], idx int, ch chan struct{}) {
+		go func(f mapper[IN, OUT], idx int) {
+			defer wg.Done() // signals completion
 			for j := idx; j < idx+batchSize && j < len(s.slice); j++ {
 				resultSlice[j] = f(s.slice[j])
 			}
-			ch <- struct{}{} // signals completion
-		}(f, i, ch)
+		}(f, i)
 	}
 	// blocking: waits for all goroutines to complete
-	for range s.slice {
-		<-ch
-	}
+	wg.Wait()
 	return From(resultSlice)
 }
