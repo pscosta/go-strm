@@ -1,6 +1,7 @@
 package strm
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -61,7 +62,6 @@ func TestParallelLinearMapReduce(t *testing.T) {
 	got := PMap(
 		From(initSlice),
 		func(it []int) int { return Reduce(From(it), func(a int, b int) int { return a + b }) },
-		true,
 	).ToSlice()
 
 	// assert
@@ -79,6 +79,7 @@ func TestParallelBatchedMapReduce(t *testing.T) {
 	got := PMap(
 		From(initSlice),
 		func(it []int) int { return Reduce(From(it), func(a int, b int) int { return a + b }) },
+		true,
 	).ToSlice()
 
 	// assert
@@ -245,6 +246,27 @@ func BenchmarkApiMap(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		result = Map(From(people),
 			func(p Person) string { return p.name },
+		).ToSlice()
+	}
+
+	require.Equal(b, len(people), len(result))
+}
+
+func BenchmarkApiPMap(b *testing.B) {
+	var result []Person
+	var people []string
+	for i := 0; i <= 10000000; i++ {
+		people = append(people, `{"name": "peter", "age": 39}`)
+	}
+
+	for i := 0; i < b.N; i++ {
+		result = PMap(From(people),
+			func(s string) Person {
+				var p Person
+				_ = json.Unmarshal([]byte(s), &p)
+				_, _ = json.Marshal(`{"name": "peter", "age": 39}`) // just another heavy op
+				return p
+			},
 		).ToSlice()
 	}
 
