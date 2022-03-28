@@ -76,7 +76,7 @@ func Map[IN any, OUT any](s *Stream[IN], f mapper[IN, OUT]) *Stream[OUT] {
 
 // PMap Returns a new Stream containing the results of applying the given function to each element in the given Stream
 // in parallel. By default, PMap will launch a new goroutine per each element present in the provided Stream
-// If the [batching] flag is present, the parallel work is batched by number of available CPU cores.
+// If the [batching] flag is present, the parallel work is batched by number of available logical CPUs.
 func PMap[IN any, OUT any](s *Stream[IN], f mapper[IN, OUT], batching ...bool) *Stream[OUT] {
 	if len(batching) == 0 {
 		return parallelLinearMap(s, f)
@@ -184,7 +184,7 @@ func parallelLinearMap[IN any, OUT any](s *Stream[IN], f mapper[IN, OUT]) *Strea
 }
 
 // parallelBatchingMap Returns a new Stream containing the results of applying the given function to each element
-// in the given Stream in parallel. The parallel work is batched by number of available CPU cores.
+// in the given Stream in parallel. The parallel work is batched by number of available logical CPUs.
 func parallelBatchingMap[IN any, OUT any](s *Stream[IN], f mapper[IN, OUT]) *Stream[OUT] {
 	resultSlice := make([]OUT, len(s.filteredSlice()))
 	cores := Min(Of(runtime.NumCPU(), len(s.slice)))
