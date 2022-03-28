@@ -306,7 +306,7 @@ and filters over the strm, can be slower than just performing native for loops.
 ```
 goos: darwin
 goarch: amd64
-pkg: streams/strm/strm
+pkg: strm/strm
 cpu: Intel(R) Core(TM) i9-8950HK CPU @ 2.90GHz
 name               old time/op   new time/op   delta
 Filter-12           114ns ± 2%     98ns ± 5%   -13.81%  (p=0.008 n=5+5)
