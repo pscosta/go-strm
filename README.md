@@ -305,20 +305,16 @@ This type encloses a `*Stream[int]` exclusively, leveraging all methods already 
 
 ```go
 // sum -> 15
-sum := strm.Range(1,5).
-	Sum()
+sum := strm.Range(1,5).Sum()
 
 // min -> 1
-min := strm.RangeOf(1, 2, 3, 4, 5).
-	Min()
+min := strm.RangeOf(1, 2, 3, 4, 5).Min()
 
 // max -> 5
-max := strm.RangeFrom([]int{1, 2, 3, 4, 5}).
-	Max()
+max := strm.RangeFrom([]int{1, 2, 3, 4, 5}).Max()
 
 // avg -> 2
-avg := strm.Range(1,4).
-	Avg()
+avg := strm.Range(1,4).Avg()
 
 // sorted -> [1 2 3 4 5]
 sorted := strm.RangeOf(5, 4, 2, 1, 3).
@@ -327,9 +323,15 @@ sorted := strm.RangeOf(5, 4, 2, 1, 3).
 
 // mappedSlice -> [2 3 4 5 6]
 mappedSlice := Map(
-    RangeOf(5, 4, 2, 1, 3).Sorted().ToStrm(),
+	RangeOf(5, 4, 2, 1, 3).Sorted().ToStrm(),
     func(it int) int { return it+1 },
 ).ToSlice()
+
+// batches -> [[2 3] [4 5] [6]]
+batches := strm.RangeOf(5, 4, 2, 1, 3, 6).
+	Sorted().
+	Filter(func(it int) bool { return it > 1 }).
+	Chunked(2)
 ```
 
 ### API Benchmarking 
