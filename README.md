@@ -338,8 +338,8 @@ batches := strm.RangeOf(5, 4, 2, 1, 3, 6).
 ### API Benchmarking 
 
 Performance-wise, single mapping and filtering ops perform very well. Chained operations like applying several mappings 
-and filters over the strm, can be slower than just performing native for loops. 
-
+and filters over the strm, can be slower than just performing native for loops.
+The following benchmarks can be found at [strm_test.go](strm/strm_test.go). 
 ```
 goos: darwin
 goarch: amd64
