@@ -206,8 +206,8 @@ func TestContains(t *testing.T) {
 	assert.False(t, hasInt2, "wrong Contains value")
 	assert.True(t, hasStruct, "wrong Contains value")
 	assert.False(t, hasString, "wrong Contains value")
-	assert.False(t, hasSlice, "wrong Contains value")
-	assert.False(t, hasSlices, "wrong Contains value")
+	assert.True(t, hasSlice, "wrong Contains value")
+	assert.True(t, hasSlices, "wrong Contains value")
 	assert.False(t, hasFuns, "wrong Contains value")
-	assert.False(t, hasMaps, "wrong Contains value")
+	assert.True(t, hasMaps, "wrong Contains value")
 }
