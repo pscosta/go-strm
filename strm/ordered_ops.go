@@ -98,15 +98,14 @@ func (s *Stream[T]) Distinct() *Stream[T] {
 	if !s.comparable {
 		return s
 	}
-	keySelector := func(t T) any { return t }
 	keys := make(map[any]struct{}, len(s.filteredSlice()))
 	j := 0
 
 	for i := 0; i < len(s.slice); i++ {
-		if _, ok := keys[keySelector(s.slice[i])]; ok {
+		if _, ok := keys[s.slice[i]]; ok {
 			continue
 		}
-		keys[keySelector(s.slice[i])] = struct{}{}
+		keys[s.slice[i]] = struct{}{}
 		s.slice[j], j = s.slice[i], j+1
 	}
 	s.slice = s.slice[:j]
