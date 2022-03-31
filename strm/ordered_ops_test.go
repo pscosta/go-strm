@@ -163,6 +163,7 @@ func TestDistinctSeveralTypes(t *testing.T) {
 	}
 
 	// call
+	emptySlice := Of(1).Filter(func(i int) bool { return false }).Distinct().ToSlice()
 	Ints := Of(1, 2, 2, 2).Distinct().ToSlice()
 	Ints2 := Of(1, 2, 3).Distinct().ToSlice()
 	Structs := Of(Person{"Tim", 30}, Person{"Tim", 30}, Person{"Tom", 40}).Distinct().ToSlice()
@@ -176,6 +177,7 @@ func TestDistinctSeveralTypes(t *testing.T) {
 	MapsNil := Of(map[int]int{1: 1}, map[int]int{1: 1}, nil).Distinct().ToSlice()
 
 	// assert
+	assert.Equal(t, 0, len(emptySlice), "wrong Distinct size")
 	assert.Equal(t, 2, len(Ints), "wrong Distinct size")
 	assert.Equal(t, 3, len(Ints2), "wrong Distinct size")
 	assert.Equal(t, 2, len(Structs), "wrong Distinct size")
