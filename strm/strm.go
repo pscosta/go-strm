@@ -1,6 +1,7 @@
 package strm
 
 import (
+	h "github.com/mitchellh/hashstructure/v2"
 	"reflect"
 	"runtime"
 	"sync"
@@ -131,6 +132,19 @@ func GroupBy[K comparable, V any](s *Stream[V], keySelector func(V) K) map[K][]V
 // returns true if the given generic type is Comparable
 func isComparableType[T any]() bool {
 	return reflect.TypeOf((*T)(nil)).Elem().Comparable()
+}
+
+// calculates a hash for the given generic value
+func (s *Stream[T]) calculateHash(idx int) any {
+	if s.comparable {
+		return s.slice[idx]
+	}
+	hash, err := h.Hash(s.slice[idx], h.FormatV2, nil)
+	if err != nil {
+		// best effort: uses the value pointer
+		return &(s.slice[idx])
+	}
+	return hash
 }
 
 // returns the filtered backing slice after applying all registered filters
