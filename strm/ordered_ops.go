@@ -105,6 +105,9 @@ func (s *Stream[T]) Distinct() *Stream[T] {
 		keys[hashKey] = struct{}{}
 		s.slice[j], j = s.slice[i], j+1
 	}
+	for i := j; i < len(s.slice); i++ {
+		s.slice[i] = *new(T) // garbage-collection: sets the zero value for T
+	}
 	s.slice = s.slice[:j]
 	return s
 }

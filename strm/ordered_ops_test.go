@@ -163,11 +163,11 @@ func TestDistinctSeveralTypes(t *testing.T) {
 	}
 
 	// call
-	Ints := Of(1, 2, 2).Distinct().ToSlice()
+	Ints := Of(1, 2, 2, 2).Distinct().ToSlice()
 	Ints2 := Of(1, 2, 3).Distinct().ToSlice()
 	Structs := Of(Person{"Tim", 30}, Person{"Tim", 30}, Person{"Tom", 40}).Distinct().ToSlice()
 	Strings := Of("Tim", "Tim", "Tom").Distinct().ToSlice()
-	Slice := From([][]int{{1}, {1}, {1, 2}, {1, 2, 3}}).Distinct().ToSlice()
+	Slice := From([][]int{{1}, {1}, {1, 2}, {1, 2, 3}, {1, 2, 3}}).Distinct().ToSlice()
 	SliceNil := From([][]int{{1}, {1}, {1, 2}, {1, 2, 3}, nil, nil}).Distinct().ToSlice()
 	Slices := Of(DifficultPerson{39, []string{"covid"}}, DifficultPerson{39, []string{"covid"}}).Distinct().ToSlice()
 	Slices2 := Of(DifficultPerson{39, []string{"covid"}}, DifficultPerson{39, []string{"covid", "19"}}).Distinct().ToSlice()
