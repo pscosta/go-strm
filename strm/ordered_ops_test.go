@@ -175,6 +175,7 @@ func TestDistinctSeveralTypes(t *testing.T) {
 	Funs := Of(func(i int) {}, nil).Distinct().ToSlice()
 	Maps := Of(map[int]int{1: 1}, map[int]int{1: 1}).Distinct().ToSlice()
 	MapsNil := Of(map[int]int{1: 1}, map[int]int{1: 1}, nil).Distinct().ToSlice()
+	arrays := Of([2]int{1: 1}, [2]int{0, 1}).Distinct().ToSlice()
 
 	// assert
 	assert.Equal(t, 0, len(emptySlice), "wrong Distinct size")
@@ -189,6 +190,7 @@ func TestDistinctSeveralTypes(t *testing.T) {
 	assert.Equal(t, 2, len(Funs), "wrong Distinct size")
 	assert.Equal(t, 1, len(Maps), "wrong Distinct size")
 	assert.Equal(t, 2, len(MapsNil), "wrong Distinct size")
+	assert.Equal(t, 1, len(arrays), "wrong Distinct size")
 }
 
 func TestChunkedOdd(t *testing.T) {
