@@ -1,4 +1,4 @@
-package strm
+package main
 
 // Plus copies the backing slices contents of both Streams into a new Stream
 func (s *Stream[T]) Plus(other *Stream[T]) *Stream[T] {
@@ -14,9 +14,9 @@ func (s *Stream[T]) Append(elems []T) *Stream[T] {
 	return s
 }
 
-// Merge merges the given [streams] into a single one
+// Merge merges the given [strm] into a single one
 // Allocates the required memory for resulting Stream
-// and the contents of the given [streams] are appended to the merged one
+// and the contents of the given [strm] are appended to the merged one
 func Merge[T any](streams ...*Stream[T]) *Stream[T] {
 	lt := 0
 	for _, s := range streams {

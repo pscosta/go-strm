@@ -1,4 +1,4 @@
-package strm
+package main
 
 import (
 	"fmt"
