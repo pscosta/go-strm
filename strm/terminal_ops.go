@@ -2,6 +2,7 @@ package strm
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 )
 
@@ -92,15 +93,19 @@ func (s *Stream[T]) Last() (t T) {
 }
 
 // Contains Returns true if [element] is found in the Stream.
-// Works for Streams of Comparable types like structs, pointers and primitive types; returns false otherwise
+// Performs O(n) search for Streams of Comparable types like structs, pointers and primitive types;
+// Uses reflect.DeepEqual for non-comparable types
 func (s *Stream[T]) Contains(element T) bool {
-	if !s.comparable {
+	if s.comparable {
+		for _, a := range s.filteredSlice() {
+			if any(a) == any(element) {
+				return true
+			}
+		}
 		return false
 	}
-	// O(n) search
-	valSelector := func(t T) any { return t }
 	for _, a := range s.filteredSlice() {
-		if valSelector(a) == valSelector(element) {
+		if reflect.DeepEqual(a, element) {
 			return true
 		}
 	}

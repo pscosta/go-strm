@@ -138,17 +138,50 @@ func TestDistinctSlice(t *testing.T) {
 	dedupedSlice := Of([]int{1}, []int{1}, []int{1, 2}).Distinct().ToSlice()
 
 	// assert
-	assert.Equal(t, 3, len(dedupedSlice), "wrong length")
+	assert.Equal(t, 2, len(dedupedSlice), "wrong length")
 	assert.Equal(t, []int{1}, dedupedSlice[0], "wrong value")
 }
 
-func TestChunked(t *testing.T) {
+func TestDistinctSeveralTypes(t *testing.T) {
+	// prepare
+	type Person struct {
+		name string
+		age  int
+	}
+	type DifficultPerson struct {
+		age    int
+		issues []string
+	}
+
 	// call
-	batches := Of(1, 2, 3, 4, 5, 6).Chunked(2)
+	emptySlice := Of(1).Filter(func(i int) bool { return false }).Distinct().ToSlice()
+	Ints := Of(1, 2, 2, 2).Distinct().ToSlice()
+	Ints2 := Of(1, 2, 3).Distinct().ToSlice()
+	Structs := Of(Person{"Tim", 30}, Person{"Tim", 30}, Person{"Tom", 40}).Distinct().ToSlice()
+	Strings := Of("Tim", "Tim", "Tom").Distinct().ToSlice()
+	Slice := From([][]int{{1}, {1}, {1, 2}, {1, 2, 3}, {1, 2, 3}}).Distinct().ToSlice()
+	SliceNil := From([][]int{{1}, {1}, {1, 2}, {1, 2, 3}, nil, nil}).Distinct().ToSlice()
+	Slices := Of(DifficultPerson{39, []string{"covid"}}, DifficultPerson{39, []string{"covid"}}).Distinct().ToSlice()
+	Slices2 := Of(DifficultPerson{39, []string{"covid"}}, DifficultPerson{39, []string{"covid", "19"}}).Distinct().ToSlice()
+	Funs := Of(func(i int) {}, nil).Distinct().ToSlice()
+	Maps := Of(map[int]int{1: 1}, map[int]int{1: 1}).Distinct().ToSlice()
+	MapsNil := Of(map[int]int{1: 1}, map[int]int{1: 1}, nil).Distinct().ToSlice()
+	arrays := Of([2]int{1: 1}, [2]int{0, 1}).Distinct().ToSlice()
 
 	// assert
-	assert.Equal(t, 3, len(batches), "wrong length")
-	From(batches).ForEach(func(b []int) { assert.Equal(t, 2, len(b), "wrong batch length") })
+	assert.Equal(t, 0, len(emptySlice), "wrong Distinct size")
+	assert.Equal(t, 2, len(Ints), "wrong Distinct size")
+	assert.Equal(t, 3, len(Ints2), "wrong Distinct size")
+	assert.Equal(t, 2, len(Structs), "wrong Distinct size")
+	assert.Equal(t, 2, len(Strings), "wrong Distinct size")
+	assert.Equal(t, 3, len(Slice), "wrong Distinct size")
+	assert.Equal(t, 4, len(SliceNil), "wrong Distinct size")
+	assert.Equal(t, 1, len(Slices), "wrong Distinct size")
+	assert.Equal(t, 1, len(Slices2), "wrong Distinct size")
+	assert.Equal(t, 2, len(Funs), "wrong Distinct size")
+	assert.Equal(t, 1, len(Maps), "wrong Distinct size")
+	assert.Equal(t, 2, len(MapsNil), "wrong Distinct size")
+	assert.Equal(t, 1, len(arrays), "wrong Distinct size")
 }
 
 func TestChunkedOdd(t *testing.T) {
@@ -159,6 +192,15 @@ func TestChunkedOdd(t *testing.T) {
 	assert.Equal(t, 4, len(batches), "wrong length")
 	assert.Equal(t, 1, len(batches[3]), "wrong last batch length")
 	From(batches).Take(3).ForEach(func(b []int) { assert.Equal(t, 2, len(b), "wrong batch length") })
+}
+
+func TestChunked(t *testing.T) {
+	// call
+	batches := Of(1, 2, 3, 4, 5, 6).Chunked(2)
+
+	// assert
+	assert.Equal(t, 3, len(batches), "wrong length")
+	From(batches).ForEach(func(b []int) { assert.Equal(t, 2, len(b), "wrong batch length") })
 }
 
 func TestWindowed(t *testing.T) {

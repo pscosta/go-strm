@@ -200,14 +200,18 @@ func TestContains(t *testing.T) {
 	hasSlices := Of(DifficultPerson{39, []string{"covid"}}).Contains(DifficultPerson{39, []string{"covid"}})
 	hasFuns := Of(func(i int) {}).Contains(func(i int) {})
 	hasMaps := Of(map[int]int{1: 1}).Contains(map[int]int{1: 1})
+	hasArray := Of([2]int{1: 1}, [2]int{1: 2}).Contains([2]int{1: 1})
+	hasArray2 := Of([2]int{1: 1}).Contains([2]int{0, 1})
 
 	// assert
 	assert.True(t, hasInt, "wrong Contains value")
 	assert.False(t, hasInt2, "wrong Contains value")
 	assert.True(t, hasStruct, "wrong Contains value")
 	assert.False(t, hasString, "wrong Contains value")
-	assert.False(t, hasSlice, "wrong Contains value")
-	assert.False(t, hasSlices, "wrong Contains value")
+	assert.True(t, hasSlice, "wrong Contains value")
+	assert.True(t, hasSlices, "wrong Contains value")
 	assert.False(t, hasFuns, "wrong Contains value")
-	assert.False(t, hasMaps, "wrong Contains value")
+	assert.True(t, hasMaps, "wrong Contains value")
+	assert.True(t, hasArray, "wrong Contains value")
+	assert.True(t, hasArray2, "wrong Contains value")
 }

@@ -3,10 +3,12 @@ module streams/strm
 go 1.18
 
 require (
-	// testing
-	github.com/stretchr/testify v1.7.1
 	// constraints
 	golang.org/x/exp v0.0.0-20220321173239-a90fa8a75705
+	// hashing non-comparable types
+	github.com/mitchellh/hashstructure/v2 v2.0.2
+	// testing
+	github.com/stretchr/testify v1.7.1
 )
 
 require (

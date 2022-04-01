@@ -92,22 +92,21 @@ func (s *Stream[T]) Reversed() *Stream[T] {
 }
 
 // Distinct In-place deduplication of the backing slice, guided with a map.
-// Streams of Comparable structs, pointers and primitive types are correctly de-duped;
-// otherwise returns the unchanged [stream].
+// Internally uses a custom hash for comparing non-comparable types
 func (s *Stream[T]) Distinct() *Stream[T] {
-	if !s.comparable {
-		return s
-	}
-	keySelector := func(t T) any { return t }
 	keys := make(map[any]struct{}, len(s.filteredSlice()))
 	j := 0
 
 	for i := 0; i < len(s.slice); i++ {
-		if _, ok := keys[keySelector(s.slice[i])]; ok {
+		hashKey := s.calculateHash(i)
+		if _, ok := keys[hashKey]; ok {
 			continue
 		}
-		keys[keySelector(s.slice[i])] = struct{}{}
+		keys[hashKey] = struct{}{}
 		s.slice[j], j = s.slice[i], j+1
+	}
+	for i := j; i < len(s.slice); i++ {
+		s.slice[i] = *new(T) // garbage-collection: sets the zero value for T
 	}
 	s.slice = s.slice[:j]
 	return s
