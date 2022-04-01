@@ -1,7 +1,7 @@
 # go-strm
 
 This is package which make use of the Generics feature introduced in Go 1.18 for 
-providing a functional oriented reach Map/Reduce API in Go.
+providing a functional oriented rich Map/Reduce API in Go.
 As this is still an experimental package, some of its apis may change slightly in future releases.
 
 ## Background
