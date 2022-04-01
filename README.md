@@ -17,6 +17,14 @@ in Go, as samples bellow illustrate.
 
 All available Api operations are [enumerated here](#api-operations-listing).
 
+## Installation
+
+Standard `go get`:
+
+```
+$ go get github.com/pscosta/go-strm/strm
+```
+
 ### Generic Usage
 
 This api is a wrapper of its inputs, either a slice or a set of elements of a generic type.
