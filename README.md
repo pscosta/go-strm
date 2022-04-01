@@ -107,7 +107,7 @@ sqrSlice := strm.Of(1, 2, 3, 4, 5, 6).
 type Person struct { name string; age  int }
 people := []Person{{"Peter", 30}, {"John", 18}, {"Sarah", 16}, {"Kate", 16}}
 
-// maps a strm of (Person) to a slice of Person.name (string)  
+// maps a go-strm of (Person) to a slice of Person.name (string)  
 // names -> [Peter John Sarah Kate]
 names := Map(From(people), func(p Person) string { return p.name }).
         ToSlice()
@@ -158,13 +158,13 @@ available logical CPUs.
 ```go
 people := []Person{{"Peter", 30}, {"John", 18}, {"Sarah", 16}, {"Kate", 16}}
 
-// maps a strm of (Person) to a slice of Person.name (string) in parallel 
+// maps a go-strm of (Person) to a slice of Person.name (string) in parallel 
 // names -> [Peter John Sarah Kate]
 names := strm.
     PMap(strm.From(people), func(p Person) string { return p.name }).
     ToSlice()
 
-// maps a strm of (Person) to a slice of Person.name (string) in parallel without batching
+// maps a go-strm of (Person) to a slice of Person.name (string) in parallel without batching
 // names -> [Peter John Sarah Kate]
 names := strm.
     PMap(strm.From(people), func(p Person) string { return p.name }, true).
@@ -371,7 +371,7 @@ func Min[O Ordered](s *Stream[O]) O
 func Sum[O Ordered](s *Stream[O]) O
 func Merge[T any](streams ...*Stream[T]) *Stream[T]
 
-// strm operations
+// go-strm operations
 func Filter(predicate func(T) bool) *Stream[T]
 func ApplyOnEach(action func(T) T) *Stream[T]
 func OnEach(f func(T)) *Stream[T]
@@ -382,7 +382,7 @@ func Drop(n int) *Stream[T]
 func Reversed() *Stream[T]
 func Distinct() *Stream[T]
 
-// Terminal strm operations
+// Terminal go-strm operations
 func ToSlice() []T
 func ForEach(action func(T))
 func Any(predicate func(T) bool) bool
