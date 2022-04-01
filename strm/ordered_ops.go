@@ -33,6 +33,9 @@ func (s *Stream[T]) Take(n int) *Stream[T] {
 		s.slice = nil
 		return s
 	}
+	for i := n; i < len(s.slice); i++ {
+		s.slice[i] = *new(T) // garbage collection: sets the zero value for T
+	}
 	s.slice = s.slice[:n]
 	return s
 }
@@ -47,6 +50,9 @@ func (s *Stream[T]) Drop(n int) *Stream[T] {
 		// the nil slice is the preferred way
 		s.slice = nil
 		return s
+	}
+	for i := 0; i < n; i++ {
+		s.slice[i] = *new(T) // garbage collection: sets the zero value for T
 	}
 	s.slice = s.slice[n:]
 	return s
