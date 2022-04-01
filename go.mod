@@ -1,4 +1,4 @@
-module strm
+module github.com/pscosta/go-strm/strm
 
 go 1.18
 
