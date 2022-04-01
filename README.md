@@ -184,8 +184,7 @@ byName := strm.GroupBy(people, func(it Person) string { return it.name })
 ````
 
 #### De-duping and Reversing
-`Distinct` de-dupes strms of `Comparable` types, like structs, pointers and primitive types, 
-otherwise, the strm remains unchanged.
+`Distinct` de-dupes strms of both `Comparable` and `Non-Comparable` types
 
 ```go
 // deduped -> [2 3 4 5 6]
@@ -198,7 +197,7 @@ dedupedStruct := strm.Of(Person{"Peter", 18}, Person{"Peter", 18}, Person{"Bruce
     Distinct().
     ToSlice()
 
-// dedupedSlices -> [[1 2] [1 2] [3 4]]
+// dedupedSlices -> [[1 2] [3 4]]
 dedupedSlices := strm.Of([]int{1, 2}, []int{1, 2}, []int{3, 4}).
     Distinct().
     ToSlice()
@@ -244,7 +243,7 @@ countBy := strm.Of(1, 2, 3, 4, 5).
 contains := strm.Of(Person{"Peter", 18}, Person{"John", 30}, Person{"Bruce", 48}).
 	Contains(Person{"Bruce", 48})
 
-// contains -> false
+// contains -> true
 contains := strm.Of([]int{1, 2}, []int{3, 4}).
 	Contains([]int{1, 2})
 
@@ -371,13 +370,13 @@ func Max[O Ordered](s *Stream[O]) O
 func Min[O Ordered](s *Stream[O]) O
 func Sum[O Ordered](s *Stream[O]) O
 func Merge[T any](streams ...*Stream[T]) *Stream[T]
-func Append(elems []T) *Stream[T]
 
 // strm operations
 func Filter(predicate func(T) bool) *Stream[T]
 func ApplyOnEach(action func(T) T) *Stream[T]
 func OnEach(f func(T)) *Stream[T]
 func Plus(other *Stream[T]) *Stream[T]
+func Append(elems []T) *Stream[T]
 func Take(n int) *Stream[T]
 func Drop(n int) *Stream[T]
 func Reversed() *Stream[T]

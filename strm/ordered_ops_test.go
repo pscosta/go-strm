@@ -142,15 +142,6 @@ func TestDistinctSlice(t *testing.T) {
 	assert.Equal(t, []int{1}, dedupedSlice[0], "wrong value")
 }
 
-func TestChunked(t *testing.T) {
-	// call
-	batches := Of(1, 2, 3, 4, 5, 6).Chunked(2)
-
-	// assert
-	assert.Equal(t, 3, len(batches), "wrong length")
-	From(batches).ForEach(func(b []int) { assert.Equal(t, 2, len(b), "wrong batch length") })
-}
-
 func TestDistinctSeveralTypes(t *testing.T) {
 	// prepare
 	type Person struct {
@@ -201,6 +192,15 @@ func TestChunkedOdd(t *testing.T) {
 	assert.Equal(t, 4, len(batches), "wrong length")
 	assert.Equal(t, 1, len(batches[3]), "wrong last batch length")
 	From(batches).Take(3).ForEach(func(b []int) { assert.Equal(t, 2, len(b), "wrong batch length") })
+}
+
+func TestChunked(t *testing.T) {
+	// call
+	batches := Of(1, 2, 3, 4, 5, 6).Chunked(2)
+
+	// assert
+	assert.Equal(t, 3, len(batches), "wrong length")
+	From(batches).ForEach(func(b []int) { assert.Equal(t, 2, len(b), "wrong batch length") })
 }
 
 func TestWindowed(t *testing.T) {
