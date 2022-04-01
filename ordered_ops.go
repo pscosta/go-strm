@@ -1,4 +1,4 @@
-package main
+package strm
 
 import (
 	"golang.org/x/exp/constraints"

@@ -1,4 +1,4 @@
-package main
+package strm
 
 import (
 	h "github.com/mitchellh/hashstructure/v2"
