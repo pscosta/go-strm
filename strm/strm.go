@@ -2,6 +2,8 @@ package strm
 
 import (
 	h "github.com/mitchellh/hashstructure/v2"
+	"golang.org/x/exp/slices"
+	"math"
 	"reflect"
 	"runtime"
 	"sync"
@@ -101,6 +103,7 @@ func FlatMap[IN any, OUT any](s *Stream[IN], f mapper[IN, *Stream[OUT]]) *Stream
 
 // Reduce Accumulates value starting with the given [start] value if provided, or with first element and applying
 // the given [reducer] operation from left to right to current accumulator value and each element.
+//
 //	operation: function that takes current accumulator value and an element, and calculates the next accumulator value.
 func Reduce[IN any, OUT any](s *Stream[IN], f reducer[OUT, IN], start ...OUT) (out OUT) {
 	if len(start) > 0 {
@@ -200,21 +203,33 @@ func parallelLinearMap[IN any, OUT any](s *Stream[IN], f mapper[IN, OUT]) *Strea
 // parallelBatchingMap Returns a new Stream containing the results of applying the given function to each element
 // in the given Stream in parallel. The parallel work is batched by number of available logical CPUs.
 func parallelBatchingMap[IN any, OUT any](s *Stream[IN], f mapper[IN, OUT]) *Stream[OUT] {
-	resultSlice := make([]OUT, len(s.filteredSlice()))
-	cores := Min(Of(runtime.NumCPU(), len(s.slice)))
-	var wg sync.WaitGroup
-	wg.Add(cores)
-	batchSize := Max(Of(len(s.slice)/cores, 1))
+	streamSize := len(s.filteredSlice())
+	resultSlice := make([]OUT, streamSize)
+	batchSize := slices.Min(Of(runtime.NumCPU(), streamSize).slice)
 
-	// launching the goroutines
-	for i := range s.slice {
+	if streamSize == 0 {
+		return From(resultSlice)
+	}
+
+	batches := int(math.Ceil(float64(streamSize / batchSize)))
+	offset := 0
+	var wg sync.WaitGroup
+	wg.Add(batches + 1)
+
+	for i := 0; i <= batches; i++ {
+		lowerBound := offset
+		upperBound := offset + batchSize
+		offset += batchSize
+		if upperBound > streamSize {
+			upperBound = streamSize
+		}
 		// launch goroutine that executes the batch mapping asynchronously
-		go func(f mapper[IN, OUT], idx int) {
-			defer wg.Done() // signals completion
-			for j := idx; j < idx+batchSize && j < len(s.slice); j++ {
-				resultSlice[j] = f(s.slice[j])
+		go func() {
+			defer wg.Done()
+			for idx := lowerBound; idx < upperBound; idx++ {
+				resultSlice[idx] = f(s.slice[idx])
 			}
-		}(f, i)
+		}()
 	}
 	// blocking: waits for all goroutines to complete
 	wg.Wait()

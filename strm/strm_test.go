@@ -71,9 +71,23 @@ func TestParallelLinearMapReduce(t *testing.T) {
 	assert.Equal(t, 6, got[2], "wrong value")
 }
 
+func TestEmptyParallelLinearMapReduce(t *testing.T) {
+	// prepare
+	var initSlice [][]int
+
+	// call
+	got := PMap(
+		From(initSlice),
+		func(it []int) int { return Reduce(From(it), func(a int, b int) int { return a + b }) },
+	).ToSlice()
+
+	// assert
+	assert.Equal(t, 0, len(got), "wrong length")
+}
+
 func TestParallelBatchedMapReduce(t *testing.T) {
 	// prepare
-	initSlice := [][]int{{1}, {1, 2}, {1, 2, 3}}
+	initSlice := [][]int{{1}, {1, 2}, {1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10}, {11, 12}, {13}, {14}, {15}, {16, 17}}
 
 	// call
 	got := PMap(
@@ -83,10 +97,56 @@ func TestParallelBatchedMapReduce(t *testing.T) {
 	).ToSlice()
 
 	// assert
-	assert.Equal(t, 3, len(got), "wrong length")
-	assert.Equal(t, 1, got[0], "wrong value")
-	assert.Equal(t, 3, got[1], "wrong value")
-	assert.Equal(t, 6, got[2], "wrong value")
+	assert.Equal(t, 11, len(got), "wrong length")
+	assert.Equal(t, []int{1, 3, 6, 15, 24, 10, 23, 13, 14, 15, 33}, got, "wrong value")
+}
+
+func TestEmptyParallelBatchedMapReduce(t *testing.T) {
+	// prepare
+	var initSlice [][]int
+
+	// call
+	got := PMap(
+		From(initSlice),
+		func(it []int) int { return Reduce(From(it), func(a int, b int) int { return a + b }) },
+		true,
+	).ToSlice()
+
+	// assert
+	assert.Equal(t, 0, len(got), "wrong length")
+	assert.Equal(t, []int{}, got, "wrong value")
+}
+
+func TestEvenElemParallelBatchedMapReduce(t *testing.T) {
+	// prepare
+	initSlice := [][]int{{1, 2}, {1}}
+
+	// call
+	got := PMap(
+		From(initSlice),
+		func(it []int) int { return Reduce(From(it), func(a int, b int) int { return a + b }) },
+		true,
+	).ToSlice()
+
+	// assert
+	assert.Equal(t, 2, len(got), "wrong length")
+	assert.Equal(t, []int{3, 1}, got, "wrong value")
+}
+
+func TestSingleElemParallelBatchedMapReduce(t *testing.T) {
+	// prepare
+	initSlice := [][]int{{1, 2}}
+
+	// call
+	got := PMap(
+		From(initSlice),
+		func(it []int) int { return Reduce(From(it), func(a int, b int) int { return a + b }) },
+		true,
+	).ToSlice()
+
+	// assert
+	assert.Equal(t, 1, len(got), "wrong length")
+	assert.Equal(t, []int{3}, got, "wrong value")
 }
 
 func TestMapReduceWithStart(t *testing.T) {
